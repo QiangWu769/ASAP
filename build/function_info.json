@@ -1,0 +1,37 @@
+{
+  "_uart_putc": {
+    "start_line": 6,
+    "end_line": 41,
+    "stack_size": 2
+  },
+  "_uart_puts": {
+    "start_line": 44,
+    "end_line": 85,
+    "stack_size": 2
+  },
+  "f_mul": {
+    "start_line": 88,
+    "end_line": 126,
+    "stack_size": 6
+  },
+  "my_memcpy": {
+    "start_line": 1925,
+    "end_line": 1981,
+    "stack_size": 10
+  },
+  "init": {
+    "start_line": 1999,
+    "end_line": 2071,
+    "stack_size": 0
+  },
+  "dnn_main": {
+    "start_line": 2074,
+    "end_line": 3264,
+    "stack_size": 56
+  },
+  "main": {
+    "start_line": 3279,
+    "end_line": 3345,
+    "stack_size": 2
+  }
+}

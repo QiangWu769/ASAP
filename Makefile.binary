@@ -1,0 +1,100 @@
+# ============================================================================
+# ASAP 二进制级编译流程 — 编译器无关版本
+# ============================================================================
+# 直接操作编译后的 .out/.elf 文件，不依赖特定编译器的汇编语法
+# 支持 GCC / LLVM / IAR / TI CCS 等任何编译器生成的 MSP430 ELF
+# ============================================================================
+
+# ===== 配置 =====
+MCU          ?= msp430fr5969
+CFLAGS       ?= -O0 -g
+BENCHMARK    ?= ar
+BUILD_DIR    ?= build_binary
+COMPILER     ?= msp430-elf-gcc
+PIPELINE     := Compiler_Binary/run_pipeline.py
+
+# 根据BENCHMARK选择源文件
+ifeq ($(BENCHMARK), ar)
+    SRC := Benchmarks/ar/main_ar.c
+else ifeq ($(BENCHMARK), cf)
+    SRC := Benchmarks/cf/main_cf_plain.c
+else ifeq ($(BENCHMARK), bc)
+    SRC := Benchmarks/bc/main_bc.c
+else ifeq ($(BENCHMARK), crc)
+    SRC := Benchmarks/crc/main_crc_test_16.c
+else ifeq ($(BENCHMARK), crc32)
+    SRC := Benchmarks/crc/main_crc_test_32.c
+else ifeq ($(BENCHMARK), conv)
+    SRC := Benchmarks/conv/main_conv_plain.c
+else ifeq ($(BENCHMARK), adpcm)
+    SRC := Benchmarks/adpcm_decode/main_adpcm.c
+else ifeq ($(BENCHMARK), adpcm_encode)
+    SRC := Benchmarks/adpcm_encode/main_adpcm_encode.c
+else ifeq ($(BENCHMARK), sha)
+    SRC := Benchmarks/sha/main_sha.c
+else
+    SRC := $(BENCHMARK)
+endif
+
+OUTPUT := $(BUILD_DIR)/firmware_final.elf
+
+# ===== 目标 =====
+.PHONY: all binary clean help
+
+all: binary
+
+binary: $(OUTPUT)
+
+$(OUTPUT): $(SRC)
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  ASAP 二进制级编译管线 — 编译器无关版本"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  源文件:   $(SRC)"
+	@echo "  编译器:   $(COMPILER)"
+	@echo "  输出目录: $(BUILD_DIR)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@mkdir -p $(BUILD_DIR)
+	python3 $(PIPELINE) $(SRC)
+	@echo ""
+	@echo "✅ ASAP 二进制级编译完成！"
+	@echo "   输出: $(OUTPUT)"
+	@ls -lh $(OUTPUT) 2>/dev/null || true
+
+clean:
+	@echo "清理二进制编译产物..."
+	rm -rf $(BUILD_DIR)
+	@echo "✓ 清理完成"
+
+help:
+	@echo "ASAP 二进制级编译管线 — 使用帮助"
+	@echo ""
+	@echo "用法:"
+	@echo "  make -f Makefile.binary                          # 编译AR benchmark"
+	@echo "  make -f Makefile.binary BENCHMARK=cf             # 编译CF benchmark"
+	@echo "  make -f Makefile.binary SRC=my_program.c         # 编译自定义程序"
+	@echo "  make -f Makefile.binary clean                    # 清理"
+	@echo ""
+	@echo "特点:"
+	@echo "  - 直接操作编译后的 .out/.elf 二进制文件"
+	@echo "  - 不依赖特定编译器的汇编语法"
+	@echo "  - 纯Python实现（ELF解析+MSP430反汇编+插桩+重建）"
+	@echo "  - 支持 GCC / LLVM / IAR 等任何编译器"
+	@echo ""
+	@echo "12个Stage:"
+	@echo "  1.  编译源文件 → ELF"
+	@echo "  2.  ELF解析 → .text段提取（纯Python）"
+	@echo "  3.  MSP430反汇编（纯Python，不依赖objdump）"
+	@echo "  4.  写操作识别 + 寄存器追踪"
+	@echo "  5.  FRAM槽位分配"
+	@echo "  6.  备份机器码生成（模板驱动）"
+	@echo "  7.  二进制插桩 + 地址重定位"
+	@echo "  8.  WID→PC映射提取"
+	@echo "  9.  调用图构建"
+	@echo "  10. 状态生命周期分析"
+	@echo "  11. 恢复逻辑生成（机器码）"
+	@echo "  12. ELF重建"
+	@echo ""
+	@echo "对比源码级方案（Makefile）:"
+	@echo "  源码级:  C → .s汇编 → 分析.s → 插桩.s → 编译链接"
+	@echo "  二进制:  C → .elf → 分析机器码 → 插桩二进制 → 重建ELF"

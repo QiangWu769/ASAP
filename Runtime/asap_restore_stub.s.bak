@@ -1,0 +1,10 @@
+; ============================================================
+; ASAP Restore Stub - 用于Stage 6临时链接
+; 实际的_asap_restore会在Stage 11生成
+; ============================================================
+    .arch msp430x
+    .cpu msp430x
+    .global _asap_restore
+
+_asap_restore:
+    RETA

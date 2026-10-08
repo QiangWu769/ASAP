@@ -1,0 +1,398 @@
+#define ENABLE_POWER_FAILURE 1
+/*
+ * Clean BC Benchmark - Pure Algorithm Implementation
+ * Simplified version without complex conditionals
+ * 
+ * Power Failure Simulation Support (based on ImmortalThreads)
+ * Define PF_SIMULATION to enable断电模拟
+ */
+
+#include <msp430.h>
+#include <stdint.h>
+#include <libio/log.h>
+
+#define LOOP_IDX 1
+#define SEED 4L
+#define ITER 100
+#define CHAR_BIT 8
+
+// ============================================================
+// 断电模拟配置（Power Failure Simulation）
+// ============================================================
+#ifdef PF_SIMULATION
+
+// 断电间隔配置
+// 使用SMCLK（8MHz）代替ACLK，不依赖LFXT晶振
+#define USE_SMCLK_FOR_PF  1     // 1=使用SMCLK, 0=使用ACLK
+
+#if USE_SMCLK_FOR_PF
+// SMCLK模式（8MHz，不需要外部晶振）
+#define MIN_PF_INTERVAL 240000  // 最小间隔：约30ms (240000/8MHz)
+#define MAX_PF_INTERVAL 1200000 // 最大间隔：约150ms (1200000/8MHz)
+#else
+// ACLK模式（32768Hz，需要LFXT晶振）
+#define MIN_PF_INTERVAL 1000    // 最小间隔：约30ms
+#define MAX_PF_INTERVAL 5000    // 最大间隔：约150ms
+#endif
+
+// 全局变量
+// 只有pf_counter需要存储在FRAM，timer_count每次重启都会重新初始化
+static volatile uint32_t timer_count = MIN_PF_INTERVAL;  // RAM（不需要保持）
+static volatile uint32_t random_num = 0;
+static volatile uint32_t mod5_rand = 0;
+static volatile uint16_t pf_counter __attribute__((section(".persistent"))) = 0;  // FRAM（需要保持）
+
+#endif // PF_SIMULATION
+
+/* Bit count lookup table */
+static const char bits[256] =
+{
+	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
+};
+
+/* BC Algorithm 1: Bit Count */
+unsigned bit_count(uint32_t x)
+{
+	unsigned n = 0;
+	if (x) do n++; while (0 != (x = x&(x-1)));
+	return n;
+}
+
+/* BC Algorithm 2: Parallel Bit Count */
+int bitcount(uint32_t i)
+{
+	i = ((i & 0xAAAAAAAAL) >>  1) + (i & 0x55555555L);
+	i = ((i & 0xCCCCCCCCL) >>  2) + (i & 0x33333333L);
+	i = ((i & 0xF0F0F0F0L) >>  4) + (i & 0x0F0F0F0FL);
+	i = ((i & 0xFF00FF00L) >>  8) + (i & 0x00FF00FFL);
+	i = ((i & 0xFFFF0000L) >> 16) + (i & 0x0000FFFFL);
+	return (int)i;
+}
+
+/* BC Algorithm 3: Non-recursive Nibble Table */
+int ntbl_bitcnt(uint32_t x)
+{
+	int cnt = bits[(int)(x & 0x0000000FL)];
+	while (0L != (x >>= 4))
+		cnt += bits[(int)(x & 0x0000000FL)];
+	return cnt;
+}
+
+/* BC Algorithm 4: Nibble Table (unrolled) */
+int ntbl_bitcount(uint32_t x)
+{
+	return
+		bits[ (int) (x & 0x0000000FUL)       ] +
+		bits[ (int)((x & 0x000000F0UL) >> 4) ] +
+		bits[ (int)((x & 0x00000F00UL) >> 8) ] +
+		bits[ (int)((x & 0x0000F000UL) >> 12)] +
+		bits[ (int)((x & 0x000F0000UL) >> 16)] +
+		bits[ (int)((x & 0x00F00000UL) >> 20)] +
+		bits[ (int)((x & 0x0F000000UL) >> 24)] +
+		bits[ (int)((x & 0xF0000000UL) >> 28)];
+}
+
+/* BC Algorithm 5: Byte-wise Table (union) */
+int BW_btbl_bitcount(uint32_t x)
+{
+	union { unsigned char ch[4]; long y; } U;
+	U.y = x;
+	return bits[U.ch[0]] + bits[U.ch[1]] + bits[U.ch[3]] + bits[U.ch[2]];
+}
+
+/* BC Algorithm 6: Array/Pointer Byte Table */
+int AR_btbl_bitcount(uint32_t x)
+{
+	unsigned char *Ptr = (unsigned char *)&x;
+	int Accu;
+	Accu  = bits[*Ptr++];
+	Accu += bits[*Ptr++];
+	Accu += bits[*Ptr++];
+	Accu += bits[*Ptr];
+	return Accu;
+}
+
+/* BC Algorithm 7: Bit Shifter */
+static int bit_shifter(uint32_t x)
+{
+	int i, n;
+	for (i = n = 0; x && (i < (sizeof(uint32_t) * CHAR_BIT)); ++i, x >>= 1)
+		n += (int)(x & 1L);
+	return n;
+}
+
+// ============================================================
+// 断电模拟函数（Power Failure Simulation Functions）
+// ============================================================
+#ifdef PF_SIMULATION
+
+/* 简化的随机数生成 */
+static void rtc_init(void)
+{
+#if USE_SMCLK_FOR_PF
+	// SMCLK模式：不需要初始化LFXT
+	// 使用TA0计数器作为伪随机数源（SMCLK，8MHz）
+	TA0CTL = TASSEL__SMCLK | MC__CONTINUOUS; // SMCLK, 连续模式
+#else
+	// ACLK模式：初始化LFXT作为ACLK源
+	PJSEL0 = BIT4 | BIT5;           // 初始化LFXT引脚
+	CSCTL0_H = 0xA5;                // 解锁CS寄存器
+	CSCTL4 &= ~LFXTOFF;             // 启用LFXT
+	
+	// 等待LFXT稳定
+	do {
+		CSCTL5 &= ~LFXTOFFG;        // 清除LFXT故障标志
+		SFRIFG1 &= ~OFIFG;
+	} while (SFRIFG1 & OFIFG);      // 测试振荡器故障标志
+	
+	CSCTL0_H = 0;                   // 锁定CS寄存器
+	
+	// 使用TA0计数器作为伪随机数源（ACLK，32768Hz）
+	TA0CTL = TASSEL__ACLK | MC__CONTINUOUS; // ACLK, 连续模式
+#endif
+}
+
+/* 设置断电定时器 */
+static void set_pf_timer(void)
+{
+#if USE_SMCLK_FOR_PF
+	// SMCLK模式（8MHz）
+	// Timer A1最大计数值为65535，需要使用连续模式+比较
+	TA1CCR0 = (uint16_t)(timer_count & 0xFFFF);  // 低16位
+	TA1CTL = TASSEL__SMCLK | MC__CONTINUOUS | TACLR;  // SMCLK，连续模式
+	TA1CCTL0 = CCIE;                // 使能比较寄存器0中断
+#else
+	// ACLK模式（32768Hz）
+	TA1CCR0 = (uint16_t)timer_count;
+	TA1CTL = TASSEL__ACLK | MC__UP | TACLR;  // ACLK，上计数模式
+	TA1CCTL0 = CCIE;                // 使能比较寄存器0中断
+#endif
+	
+	__bis_SR_register(GIE);         // 使能全局中断！
+}
+
+/* 定时器中断 - 模拟断电 */
+#if defined(__GNUC__)
+void __attribute__((interrupt(TIMER1_A0_VECTOR))) timer_pf_isr(void)
+#else
+#error Compiler not supported!
+#endif
+{
+	// 使用TA0R（连续运行的计数器）产生伪随机数
+	random_num = TA0R;
+	mod5_rand = random_num % 51;
+	random_num = MIN_PF_INTERVAL + mod5_rand * ((MAX_PF_INTERVAL - MIN_PF_INTERVAL) / 50);
+	timer_count = random_num;
+	
+	// 增加断电计数器
+	pf_counter++;
+	
+#if USE_SMCLK_FOR_PF
+	// SMCLK连续模式：更新下次比较值
+	TA1CCR0 += (uint16_t)(timer_count & 0xFFFF);
+#endif
+	
+	// 触发软件Brown-Out Reset，模拟断电！
+	PMMCTL0 = 0x0008;
+}
+
+/* 重启后的初始化（每次断电恢复后调用）*/
+static void pf_reboot_init(void)
+{
+	rtc_init();
+	set_pf_timer();
+	// 不在这里输出，在main中输出（确保UART已完全初始化）
+}
+
+#endif // PF_SIMULATION
+
+/* Main test loop */
+int main()
+{
+	/* 阶段2：进入main - 红灯熄灭，只留绿灯 */
+	*(volatile unsigned char*)0x0202 &= ~0x01;  /* P1OUT &= ~BIT0 (红灯灭) */
+	INIT_CONSOLE();  // Initialize output hardware
+	
+    PRINTF("MAIN_V2\r\n");  // 版本标记：确认新固件
+	
+	// 验证是否从Bootloader进入
+	volatile uint16_t* boot_marker = (volatile uint16_t*)0x6430;
+	if (*boot_marker == 0xB007) {
+		PRINTF("[BOOT OK]\r\n");  // 从Bootloader冷启动进入
+	} else if (*boot_marker == 0xC110) {
+		PRINTF("[CRT0 OK]\r\n");  // 从GCC CRT0进入（方案1）
+	} else {
+		PRINTF("[BOOT ???]\r\n");  // 未知启动方式
+		PRINTF("Marker=");
+		PRINTF_UINT(*boot_marker);
+
+	// ===== 软件断电模拟：在第一次执行func=3时触发 =====
+	static volatile uint16_t __attribute__((section(".persistent"))) pf_counter = 0;
+	extern volatile uint16_t ASAP_WID_SAVE;
+	
+	PRINTF("PF_Counter=");
+	PRINTF_UINT(pf_counter);
+	PRINTF(" WID_Now=");
+	PRINTF_UINT(ASAP_WID_SAVE);
+	PRINTF("\r\n");
+	
+	if (pf_counter == 0) {
+		// 第一次执行：设置定时器，延迟触发断电
+		pf_counter = 1;
+		TBCTL = TBSSEL__ACLK | ID__8 | MC__CONTINUOUS | TBCLR;
+		TBCCTL1 = CCIE;
+		TBCCR1 = 50;  // 更快触发断电  // 触发时间
+		__enable_interrupt();
+		PRINTF(">>> Power Failure Timer ARMED <<<\r\n");
+	} else {
+		// 恢复后：关闭定时器，继续执行
+		TBCCTL1 = 0;
+		PRINTF(">>> RECOVERED! Continuing...<<<\r\n");
+	}
+		PRINTF("\r\n");
+	}
+	
+#ifdef PF_SIMULATION
+	// 输出断电次数（如果有）
+	if (pf_counter > 0) {
+		PRINTF("PF#");
+		PRINTF_UINT(pf_counter);
+		PRINTF("\r\n");
+	}
+	
+	// 初始化断电模拟
+	pf_reboot_init();
+	
+#if USE_SMCLK_FOR_PF
+	PRINTF("[PF-SMCLK]\r\n");  // SMCLK模式（不需要LFXT晶振）
+#else
+	PRINTF("[PF-ACLK]\r\n");   // ACLK模式（需要LFXT晶振）
+#endif
+	
+	// 调试：输出Timer配置
+	PRINTF("T=");
+	PRINTF_UINT((uint16_t)(timer_count >> 16));  // 高16位
+	PRINTF_UINT((uint16_t)(timer_count & 0xFFFF)); // 低16位
+	PRINTF("\r\n");
+#endif
+	
+	unsigned n_0, n_1, n_2, n_3, n_4, n_5, n_6;
+	uint32_t seed;
+	unsigned iter, func;
+
+    while (1) {
+        for (unsigned cnt = 0; cnt < LOOP_IDX; ++cnt) {
+            n_0 = n_1 = n_2 = n_3 = n_4 = n_5 = n_6 = 0;
+            
+            // 调试：检查初始化后的值
+            PRINTF("INIT ");
+            PRINTF_UINT(n_1);
+            PRINTF("\r\n");
+            
+            PRINTF("START\r\n");
+
+			for (func = 0; func < 7; func++) {
+				// 输出当前执行的算法编号
+				PRINTF("F");
+				PRINTF_UINT(func);
+				PRINTF("\r\n");
+				
+				seed = (uint32_t)SEED;
+				
+			if(func == 0) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_0 += bit_count(seed);
+				PRINTF("n0 "); PRINTF_UINT(n_0); PRINTF("\r\n");
+			}
+			else if(func == 1) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_1 += bitcount(seed);
+				PRINTF("n1 "); PRINTF_UINT(n_1); PRINTF("\r\n");
+			}
+			else if(func == 2) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_2 += ntbl_bitcnt(seed);
+				PRINTF("n2 "); PRINTF_UINT(n_2); PRINTF("\r\n");
+			}
+			else if(func == 3) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_3 += ntbl_bitcount(seed);
+				PRINTF("n3 "); PRINTF_UINT(n_3); PRINTF("\r\n");
+			}
+			else if(func == 4) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_4 += BW_btbl_bitcount(seed);
+				PRINTF("n4 "); PRINTF_UINT(n_4); PRINTF("\r\n");
+			}
+			else if(func == 5) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_5 += AR_btbl_bitcount(seed);
+				PRINTF("n5 "); PRINTF_UINT(n_5); PRINTF("\r\n");
+			}
+			else if(func == 6) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_6 += bit_shifter(seed);
+				PRINTF("n6 "); PRINTF_UINT(n_6); PRINTF("\r\n");
+			}
+			}
+
+			PRINTF("end\r\n");
+			PRINTF_UINT(n_0); PRINTF("\r\n");
+			PRINTF_UINT(n_1); PRINTF("\r\n");
+			PRINTF_UINT(n_2); PRINTF("\r\n");
+			PRINTF_UINT(n_3); PRINTF("\r\n");
+			PRINTF_UINT(n_4); PRINTF("\r\n");
+			PRINTF_UINT(n_5); PRINTF("\r\n");
+		PRINTF_UINT(n_6); PRINTF("\r\n");
+		
+		// === 输出最终WID ===
+		extern volatile uint16_t ASAP_WID_SAVE;
+		PRINTF(" WID=");
+		PRINTF_UINT(ASAP_WID_SAVE);
+		PRINTF("\r\n");
+	}
+}
+return 0;
+}
+
+// ===== 软件断电模拟（在文件末尾添加）=====
+// #ifdef ENABLE_POWER_FAILURE
+// Timer中断：模拟断电
+__attribute__((interrupt(TIMER0_B1_VECTOR)))
+void TimerB0_ISR(void) {
+    // 触发软件复位
+    PMMCTL0 = PMMPW | PMMSWPOR;
+    TBCTL |= TBCLR;  // 清除timer
+}
+
+// 初始化断电模拟Timer
+void init_power_failure_timer(void) {
+    // 配置TimerB0
+    TBCTL = TBSSEL__ACLK | ID__8 | MC__CONTINUOUS | TBCLR;  // ACLK, /8, continuous
+    TBCCTL1 = CCIE;  // 使能比较中断
+    TBCCR1 = 100;    // 触发时间（短一点，快速测试）
+}
+
+// ===== Timer中断：触发软件复位（模拟断电）=====
+__attribute__((interrupt(TIMER0_B1_VECTOR)))
+void TimerB0_ISR(void) {
+	// 触发软件POR (Power-On Reset)
+	PMMCTL0 = PMMPW | PMMSWPOR;
+	TBCTL |= TBCLR;
+}
+#endif

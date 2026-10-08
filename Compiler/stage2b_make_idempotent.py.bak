@@ -1,0 +1,216 @@
+#!/usr/bin/env python3
+"""
+Stage 2b: 幂等化转换
+将非幂等指令转换为幂等的 load-compute-store 序列：
+  - inc/dec/incd/decd → 使用FRAM临时变量
+  - ADD/SUB #imm, mem_dst → 使用寄存器R15（最终MOV是幂等的）
+"""
+import argparse
+import re
+
+# FRAM 临时变量地址（不会断电丢失）
+TEMP_VAR_ADDR = "0x65F0"
+
+# 用于load-compute-store的临时寄存器
+# 注意：R15/R14/R13被编译器大量使用，R11通常空闲
+TEMP_REG = "R11"
+
+def is_memory_operand(operand):
+    """检查操作数是否是内存操作数（非寄存器）"""
+    operand = operand.strip()
+    # 寄存器模式：R0-R15, SP, SR, PC, CG
+    if re.match(r'^[rR]\d{1,2}$', operand):
+        return False
+    if operand.upper() in ['SP', 'SR', 'PC', 'CG']:
+        return False
+    # 其他都是内存操作数：&var, offset(Rn), @Rn, @Rn+, label等
+    return True
+
+def is_non_idempotent(line):
+    """检查是否是非幂等指令"""
+    line_stripped = line.strip()
+    
+    # 1. 匹配 inc/dec/incd/decd 指令
+    patterns = [
+        r'^\s*inc\.?[bw]?\s+',
+        r'^\s*dec\.?[bw]?\s+',
+        r'^\s*incd\.?[bw]?\s+',
+        r'^\s*decd\.?[bw]?\s+',
+    ]
+    for pattern in patterns:
+        if re.match(pattern, line_stripped, re.IGNORECASE):
+            return True
+    
+    # 2. 匹配 ADD/SUB #imm, mem_dst 形式
+    # 例如: ADD.W #1, 16(R1) 或 SUB.B #5, &count
+    add_sub_match = re.match(
+        r'^\s*(add|sub)\.?([bw])?\s+#([^,]+),\s*(.+?)(?:\s*;.*)?$', 
+        line_stripped, 
+        re.IGNORECASE
+    )
+    if add_sub_match:
+        dst = add_sub_match.group(4).strip()
+        if is_memory_operand(dst):
+            return True
+    
+    return False
+
+def parse_instruction(line):
+    """解析指令，提取操作码、宽度、操作数"""
+    # 匹配指令格式：opcode[.width] operand 或 opcode[.width] src, dst
+    line_stripped = line.strip()
+    comment_match = re.search(r';(.*)$', line_stripped)
+    comment = comment_match.group(1) if comment_match else ''
+    
+    # 去掉注释再解析
+    line_no_comment = re.sub(r';.*$', '', line_stripped).strip()
+    
+    # 尝试匹配双操作数指令：opcode[.width] src, dst
+    match2 = re.match(r'^(\w+)(\.([bw]))?\s+([^,]+),\s*(.+)$', line_no_comment, re.IGNORECASE)
+    if match2:
+        return {
+            'opcode': match2.group(1).lower(),
+            'width': match2.group(3) or 'w',
+            'src': match2.group(4).strip(),
+            'dst': match2.group(5).strip(),
+            'operand': None,  # 双操作数
+            'comment': comment
+        }
+    
+    # 尝试匹配单操作数指令：opcode[.width] operand
+    match1 = re.match(r'^(\w+)(\.([bw]))?\s+(.+)$', line_no_comment, re.IGNORECASE)
+    if match1:
+        return {
+            'opcode': match1.group(1).lower(),
+            'width': match1.group(3) or 'w',
+            'operand': match1.group(4).strip(),
+            'src': None,
+            'dst': None,
+            'comment': comment
+        }
+    
+    return None
+
+def make_idempotent(line):
+    """将非幂等指令转换为幂等序列"""
+    inst = parse_instruction(line)
+    if not inst:
+        return [line]  # 无法解析，保持原样
+    
+    opcode = inst['opcode']
+    width = inst['width']
+    operand = inst['operand']
+    src = inst.get('src')
+    dst = inst.get('dst')
+    comment = inst['comment']
+    
+    width_suffix = f".{width.upper()}" if width else ".W"
+    
+    idempotent_lines = []
+    
+    # ===== 处理 INC/DEC/INCD/DECD（单操作数）=====
+    if opcode == 'inc':
+        idempotent_lines.append(f"\t; 幂等化: INC {operand}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{operand}, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tADD{width_suffix}\t#1, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t&{TEMP_VAR_ADDR}, {operand}\n")
+    
+    elif opcode == 'dec':
+        idempotent_lines.append(f"\t; 幂等化: DEC {operand}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{operand}, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tSUB{width_suffix}\t#1, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t&{TEMP_VAR_ADDR}, {operand}\n")
+    
+    elif opcode == 'incd':
+        idempotent_lines.append(f"\t; 幂等化: INCD {operand}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{operand}, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tADD{width_suffix}\t#2, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t&{TEMP_VAR_ADDR}, {operand}\n")
+    
+    elif opcode == 'decd':
+        idempotent_lines.append(f"\t; 幂等化: DECD {operand}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{operand}, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tSUB{width_suffix}\t#2, &{TEMP_VAR_ADDR}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t&{TEMP_VAR_ADDR}, {operand}\n")
+    
+    # ===== 处理 ADD/SUB #imm, mem_dst（双操作数）=====
+    elif opcode == 'add' and src and dst and src.startswith('#') and is_memory_operand(dst):
+        # ADD #imm, mem_dst → MOV mem_dst, R15; ADD #imm, R15; MOV R15, mem_dst
+        # 最后的MOV是幂等的：重复执行写入相同的值
+        imm = src
+        idempotent_lines.append(f"\t; 幂等化: ADD {imm}, {dst}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{dst}, {TEMP_REG}\n")
+        idempotent_lines.append(f"\tADD{width_suffix}\t{imm}, {TEMP_REG}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{TEMP_REG}, {dst}\n")
+    
+    elif opcode == 'sub' and src and dst and src.startswith('#') and is_memory_operand(dst):
+        # SUB #imm, mem_dst → MOV mem_dst, R15; SUB #imm, R15; MOV R15, mem_dst
+        imm = src
+        idempotent_lines.append(f"\t; 幂等化: SUB {imm}, {dst}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{dst}, {TEMP_REG}\n")
+        idempotent_lines.append(f"\tSUB{width_suffix}\t{imm}, {TEMP_REG}\n")
+        idempotent_lines.append(f"\tMOV{width_suffix}\t{TEMP_REG}, {dst}\n")
+    
+    else:
+        # 其他指令，保持原样
+        return [line]
+    
+    if comment:
+        idempotent_lines[-1] = idempotent_lines[-1].rstrip() + f"\t; {comment}\n"
+    
+    return idempotent_lines
+
+def transform_to_idempotent(input_asm, output_asm):
+    """将汇编文件中的非幂等指令转换为幂等序列"""
+    with open(input_asm, 'r') as f:
+        lines = f.readlines()
+    
+    output_lines = []
+    transform_count = 0
+    
+    for line in lines:
+        if is_non_idempotent(line):
+            # 转换为幂等序列
+            idempotent_lines = make_idempotent(line)
+            output_lines.extend(idempotent_lines)
+            transform_count += 1
+        else:
+            # 保持原样
+            output_lines.append(line)
+    
+    with open(output_asm, 'w') as f:
+        f.writelines(output_lines)
+    
+    return transform_count
+
+def main():
+    parser = argparse.ArgumentParser(description='Stage 2b: 幂等化转换')
+    parser.add_argument('input', help='输入汇编文件')
+    parser.add_argument('--output', default='build/A_idempotent.s', help='输出汇编文件')
+    
+    args = parser.parse_args()
+    
+    count = transform_to_idempotent(args.input, args.output)
+    
+    print(f"  ✓ 幂等化转换完成:")
+    print(f"    - 转换了 {count} 条非幂等指令")
+    print(f"    - 处理类型: INC/DEC/INCD/DECD, ADD/SUB #imm mem")
+    print(f"    - FRAM临时变量: {TEMP_VAR_ADDR}")
+    print(f"    - 临时寄存器: {TEMP_REG}")
+    print(f"    - 输出: {args.output}")
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+

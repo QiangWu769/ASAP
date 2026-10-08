@@ -1,0 +1,1629 @@
+{
+  "addr_to_slot": {
+    "_uart_putc::SP+1": {
+      "slot_addr": "0x6400",
+      "slot_symbol": "__SLOT__uart_putc_SP_1"
+    },
+    "_uart_puts::SP+0": {
+      "slot_addr": "0x6402",
+      "slot_symbol": "__SLOT__uart_puts_SP_0"
+    },
+    "dnn_main::R12+0": {
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0"
+    },
+    "dnn_main::R13+0": {
+      "slot_addr": "0x640A",
+      "slot_symbol": "__SLOT_dnn_main_R13_0"
+    },
+    "dnn_main::SP+0": {
+      "slot_addr": "0x640E",
+      "slot_symbol": "__SLOT_dnn_main_SP_0"
+    },
+    "dnn_main::SP+10": {
+      "slot_addr": "0x6412",
+      "slot_symbol": "__SLOT_dnn_main_SP_10"
+    },
+    "dnn_main::SP+12": {
+      "slot_addr": "0x6414",
+      "slot_symbol": "__SLOT_dnn_main_SP_12"
+    },
+    "dnn_main::SP+14": {
+      "slot_addr": "0x6416",
+      "slot_symbol": "__SLOT_dnn_main_SP_14"
+    },
+    "dnn_main::SP+16": {
+      "slot_addr": "0x6418",
+      "slot_symbol": "__SLOT_dnn_main_SP_16"
+    },
+    "dnn_main::SP+18": {
+      "slot_addr": "0x641A",
+      "slot_symbol": "__SLOT_dnn_main_SP_18"
+    },
+    "dnn_main::SP+2": {
+      "slot_addr": "0x641C",
+      "slot_symbol": "__SLOT_dnn_main_SP_2"
+    },
+    "dnn_main::SP+20": {
+      "slot_addr": "0x641E",
+      "slot_symbol": "__SLOT_dnn_main_SP_20"
+    },
+    "dnn_main::SP+22": {
+      "slot_addr": "0x6420",
+      "slot_symbol": "__SLOT_dnn_main_SP_22"
+    },
+    "dnn_main::SP+24": {
+      "slot_addr": "0x6422",
+      "slot_symbol": "__SLOT_dnn_main_SP_24"
+    },
+    "dnn_main::SP+26": {
+      "slot_addr": "0x6424",
+      "slot_symbol": "__SLOT_dnn_main_SP_26"
+    },
+    "dnn_main::SP+28": {
+      "slot_addr": "0x6426",
+      "slot_symbol": "__SLOT_dnn_main_SP_28"
+    },
+    "dnn_main::SP+30": {
+      "slot_addr": "0x6428",
+      "slot_symbol": "__SLOT_dnn_main_SP_30"
+    },
+    "dnn_main::SP+32": {
+      "slot_addr": "0x642A",
+      "slot_symbol": "__SLOT_dnn_main_SP_32"
+    },
+    "dnn_main::SP+34": {
+      "slot_addr": "0x642C",
+      "slot_symbol": "__SLOT_dnn_main_SP_34"
+    },
+    "dnn_main::SP+36": {
+      "slot_addr": "0x642E",
+      "slot_symbol": "__SLOT_dnn_main_SP_36"
+    },
+    "dnn_main::SP+38": {
+      "slot_addr": "0x6430",
+      "slot_symbol": "__SLOT_dnn_main_SP_38"
+    },
+    "dnn_main::SP+4": {
+      "slot_addr": "0x6432",
+      "slot_symbol": "__SLOT_dnn_main_SP_4"
+    },
+    "dnn_main::SP+40": {
+      "slot_addr": "0x6434",
+      "slot_symbol": "__SLOT_dnn_main_SP_40"
+    },
+    "dnn_main::SP+42": {
+      "slot_addr": "0x6436",
+      "slot_symbol": "__SLOT_dnn_main_SP_42"
+    },
+    "dnn_main::SP+44": {
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44"
+    },
+    "dnn_main::SP+46": {
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46"
+    },
+    "dnn_main::SP+48": {
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48"
+    },
+    "dnn_main::SP+50": {
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50"
+    },
+    "dnn_main::SP+52": {
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52"
+    },
+    "dnn_main::SP+6": {
+      "slot_addr": "0x6442",
+      "slot_symbol": "__SLOT_dnn_main_SP_6"
+    },
+    "dnn_main::SP+8": {
+      "slot_addr": "0x6444",
+      "slot_symbol": "__SLOT_dnn_main_SP_8"
+    },
+    "f_mul::SP+0": {
+      "slot_addr": "0x6446",
+      "slot_symbol": "__SLOT_f_mul_SP_0"
+    },
+    "f_mul::SP+2": {
+      "slot_addr": "0x644A",
+      "slot_symbol": "__SLOT_f_mul_SP_2"
+    },
+    "f_mul::SP+4": {
+      "slot_addr": "0x644C",
+      "slot_symbol": "__SLOT_f_mul_SP_4"
+    },
+    "main::SP+0": {
+      "slot_addr": "0x644E",
+      "slot_symbol": "__SLOT_main_SP_0"
+    },
+    "my_memcpy::R12+0": {
+      "slot_addr": "0x6452",
+      "slot_symbol": "__SLOT_my_memcpy_R12_0"
+    },
+    "my_memcpy::SP+0": {
+      "slot_addr": "0x6456",
+      "slot_symbol": "__SLOT_my_memcpy_SP_0"
+    },
+    "my_memcpy::SP+2": {
+      "slot_addr": "0x645A",
+      "slot_symbol": "__SLOT_my_memcpy_SP_2"
+    },
+    "my_memcpy::SP+4": {
+      "slot_addr": "0x645C",
+      "slot_symbol": "__SLOT_my_memcpy_SP_4"
+    },
+    "my_memcpy::SP+6": {
+      "slot_addr": "0x645E",
+      "slot_symbol": "__SLOT_my_memcpy_SP_6"
+    },
+    "my_memcpy::SP+8": {
+      "slot_addr": "0x6460",
+      "slot_symbol": "__SLOT_my_memcpy_SP_8"
+    }
+  },
+  "addr_slot_symbols": {
+    "_uart_puts::SP+0": {
+      "addr_slot_addr": "0x6404",
+      "addr_slot_symbol": "__ADDR__uart_puts_SP_0"
+    },
+    "dnn_main::R12+0": {
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "dnn_main::R13+0": {
+      "addr_slot_addr": "0x640C",
+      "addr_slot_symbol": "__ADDR_dnn_main_R13_0"
+    },
+    "dnn_main::SP+0": {
+      "addr_slot_addr": "0x6410",
+      "addr_slot_symbol": "__ADDR_dnn_main_SP_0"
+    },
+    "f_mul::SP+0": {
+      "addr_slot_addr": "0x6448",
+      "addr_slot_symbol": "__ADDR_f_mul_SP_0"
+    },
+    "main::SP+0": {
+      "addr_slot_addr": "0x6450",
+      "addr_slot_symbol": "__ADDR_main_SP_0"
+    },
+    "my_memcpy::R12+0": {
+      "addr_slot_addr": "0x6454",
+      "addr_slot_symbol": "__ADDR_my_memcpy_R12_0"
+    },
+    "my_memcpy::SP+0": {
+      "addr_slot_addr": "0x6458",
+      "addr_slot_symbol": "__ADDR_my_memcpy_SP_0"
+    }
+  },
+  "sram_global_slots": {
+    "SRAM::count": {
+      "slot_addr": "0x6462",
+      "slot_symbol": "__SLOT_SRAM_count",
+      "sram_addr": "count"
+    }
+  },
+  "array_allocs": {
+    "buf1": {
+      "base_addr": "0x6464",
+      "base_symbol": "__backup_buf1_start",
+      "size": 500,
+      "wid_list": [
+        "W046",
+        "W064",
+        "W132"
+      ]
+    },
+    "buf2": {
+      "base_addr": "0x684C",
+      "base_symbol": "__backup_buf2_start",
+      "size": 500,
+      "wid_list": [
+        "W085",
+        "W107"
+      ]
+    },
+    "fc1_b": {
+      "base_addr": "0x6C34",
+      "base_symbol": "__backup_fc1_b_start",
+      "size": 500,
+      "wid_list": [
+        "W126"
+      ]
+    },
+    "fc2_b": {
+      "base_addr": "0x701C",
+      "base_symbol": "__backup_fc2_b_start",
+      "size": 500,
+      "wid_list": [
+        "W135"
+      ]
+    }
+  },
+  "wid_to_slot": {
+    "W001": {
+      "logical_addr": "_uart_putc::SP+1",
+      "slot_addr": "0x6400",
+      "slot_symbol": "__SLOT__uart_putc_SP_1",
+      "addr_mode": "INDEXED",
+      "offset": 1,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W002": {
+      "logical_addr": "_uart_puts::SP+0",
+      "slot_addr": "0x6402",
+      "slot_symbol": "__SLOT__uart_puts_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6404",
+      "addr_slot_symbol": "__ADDR__uart_puts_SP_0"
+    },
+    "W003": {
+      "logical_addr": "_uart_puts::SP+0",
+      "slot_addr": "0x6402",
+      "slot_symbol": "__SLOT__uart_puts_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6404",
+      "addr_slot_symbol": "__ADDR__uart_puts_SP_0"
+    },
+    "W004": {
+      "logical_addr": "f_mul::SP+2",
+      "slot_addr": "0x644A",
+      "slot_symbol": "__SLOT_f_mul_SP_2",
+      "addr_mode": "INDEXED",
+      "offset": 2,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W005": {
+      "logical_addr": "f_mul::SP+0",
+      "slot_addr": "0x6446",
+      "slot_symbol": "__SLOT_f_mul_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6448",
+      "addr_slot_symbol": "__ADDR_f_mul_SP_0"
+    },
+    "W006": {
+      "logical_addr": "f_mul::SP+4",
+      "slot_addr": "0x644C",
+      "slot_symbol": "__SLOT_f_mul_SP_4",
+      "addr_mode": "INDEXED",
+      "offset": 4,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W007": {
+      "logical_addr": "f_mul::SP+4",
+      "slot_addr": "0x644C",
+      "slot_symbol": "__SLOT_f_mul_SP_4",
+      "addr_mode": "INDEXED",
+      "offset": 4,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W008": {
+      "logical_addr": "f_mul::SP+4",
+      "slot_addr": "0x644C",
+      "slot_symbol": "__SLOT_f_mul_SP_4",
+      "addr_mode": "INDEXED",
+      "offset": 4,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W009": {
+      "logical_addr": "my_memcpy::SP+4",
+      "slot_addr": "0x645C",
+      "slot_symbol": "__SLOT_my_memcpy_SP_4",
+      "addr_mode": "INDEXED",
+      "offset": 4,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W010": {
+      "logical_addr": "my_memcpy::SP+2",
+      "slot_addr": "0x645A",
+      "slot_symbol": "__SLOT_my_memcpy_SP_2",
+      "addr_mode": "INDEXED",
+      "offset": 2,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W011": {
+      "logical_addr": "my_memcpy::SP+0",
+      "slot_addr": "0x6456",
+      "slot_symbol": "__SLOT_my_memcpy_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6458",
+      "addr_slot_symbol": "__ADDR_my_memcpy_SP_0"
+    },
+    "W012": {
+      "logical_addr": "my_memcpy::SP+8",
+      "slot_addr": "0x6460",
+      "slot_symbol": "__SLOT_my_memcpy_SP_8",
+      "addr_mode": "INDEXED",
+      "offset": 8,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W013": {
+      "logical_addr": "my_memcpy::SP+6",
+      "slot_addr": "0x645E",
+      "slot_symbol": "__SLOT_my_memcpy_SP_6",
+      "addr_mode": "INDEXED",
+      "offset": 6,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W014": {
+      "logical_addr": "my_memcpy::SP+6",
+      "slot_addr": "0x645E",
+      "slot_symbol": "__SLOT_my_memcpy_SP_6",
+      "addr_mode": "INDEXED",
+      "offset": 6,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W015": {
+      "logical_addr": "my_memcpy::SP+8",
+      "slot_addr": "0x6460",
+      "slot_symbol": "__SLOT_my_memcpy_SP_8",
+      "addr_mode": "INDEXED",
+      "offset": 8,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W016": {
+      "logical_addr": "my_memcpy::R12+0",
+      "slot_addr": "0x6452",
+      "slot_symbol": "__SLOT_my_memcpy_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6454",
+      "addr_slot_symbol": "__ADDR_my_memcpy_R12_0"
+    },
+    "W017": {
+      "logical_addr": "my_memcpy::SP+0",
+      "slot_addr": "0x6456",
+      "slot_symbol": "__SLOT_my_memcpy_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6458",
+      "addr_slot_symbol": "__ADDR_my_memcpy_SP_0"
+    },
+    "W018": {
+      "logical_addr": "dnn_main::SP+0",
+      "slot_addr": "0x640E",
+      "slot_symbol": "__SLOT_dnn_main_SP_0",
+      "addr_mode": "INDEXED",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6410",
+      "addr_slot_symbol": "__ADDR_dnn_main_SP_0"
+    },
+    "W019": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W020": {
+      "logical_addr": "dnn_main::SP+12",
+      "slot_addr": "0x6414",
+      "slot_symbol": "__SLOT_dnn_main_SP_12",
+      "addr_mode": "INDEXED",
+      "offset": 12,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W021": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W022": {
+      "logical_addr": "dnn_main::R13+0",
+      "slot_addr": "0x640A",
+      "slot_symbol": "__SLOT_dnn_main_R13_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R13",
+      "type": "scalar",
+      "addr_slot_addr": "0x640C",
+      "addr_slot_symbol": "__ADDR_dnn_main_R13_0"
+    },
+    "W023": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W024": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W025": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W026": {
+      "logical_addr": "dnn_main::SP+2",
+      "slot_addr": "0x641C",
+      "slot_symbol": "__SLOT_dnn_main_SP_2",
+      "addr_mode": "INDEXED",
+      "offset": 2,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W027": {
+      "logical_addr": "dnn_main::SP+0",
+      "slot_addr": "0x640E",
+      "slot_symbol": "__SLOT_dnn_main_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6410",
+      "addr_slot_symbol": "__ADDR_dnn_main_SP_0"
+    },
+    "W028": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W029": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W030": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W031": {
+      "logical_addr": "dnn_main::SP+42",
+      "slot_addr": "0x6436",
+      "slot_symbol": "__SLOT_dnn_main_SP_42",
+      "addr_mode": "INDEXED",
+      "offset": 42,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W032": {
+      "logical_addr": "dnn_main::SP+12",
+      "slot_addr": "0x6414",
+      "slot_symbol": "__SLOT_dnn_main_SP_12",
+      "addr_mode": "INDEXED",
+      "offset": 12,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W033": {
+      "logical_addr": "dnn_main::SP+40",
+      "slot_addr": "0x6434",
+      "slot_symbol": "__SLOT_dnn_main_SP_40",
+      "addr_mode": "INDEXED",
+      "offset": 40,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W034": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W035": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W036": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W037": {
+      "logical_addr": "dnn_main::SP+40",
+      "slot_addr": "0x6434",
+      "slot_symbol": "__SLOT_dnn_main_SP_40",
+      "addr_mode": "INDEXED",
+      "offset": 40,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W038": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W039": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W040": {
+      "logical_addr": "dnn_main::SP+42",
+      "slot_addr": "0x6436",
+      "slot_symbol": "__SLOT_dnn_main_SP_42",
+      "addr_mode": "INDEXED",
+      "offset": 42,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W041": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W042": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W043": {
+      "logical_addr": "dnn_main::SP+6",
+      "slot_addr": "0x6442",
+      "slot_symbol": "__SLOT_dnn_main_SP_6",
+      "addr_mode": "INDEXED",
+      "offset": 6,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W044": {
+      "logical_addr": "dnn_main::SP+4",
+      "slot_addr": "0x6432",
+      "slot_symbol": "__SLOT_dnn_main_SP_4",
+      "addr_mode": "INDEXED",
+      "offset": 4,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W045": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W047": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W048": {
+      "logical_addr": "dnn_main::SP+38",
+      "slot_addr": "0x6430",
+      "slot_symbol": "__SLOT_dnn_main_SP_38",
+      "addr_mode": "INDEXED",
+      "offset": 38,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W049": {
+      "logical_addr": "dnn_main::SP+12",
+      "slot_addr": "0x6414",
+      "slot_symbol": "__SLOT_dnn_main_SP_12",
+      "addr_mode": "INDEXED",
+      "offset": 12,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W050": {
+      "logical_addr": "dnn_main::SP+36",
+      "slot_addr": "0x642E",
+      "slot_symbol": "__SLOT_dnn_main_SP_36",
+      "addr_mode": "INDEXED",
+      "offset": 36,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W051": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W052": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W053": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W054": {
+      "logical_addr": "dnn_main::SP+36",
+      "slot_addr": "0x642E",
+      "slot_symbol": "__SLOT_dnn_main_SP_36",
+      "addr_mode": "INDEXED",
+      "offset": 36,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W055": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W056": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W057": {
+      "logical_addr": "dnn_main::SP+38",
+      "slot_addr": "0x6430",
+      "slot_symbol": "__SLOT_dnn_main_SP_38",
+      "addr_mode": "INDEXED",
+      "offset": 38,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W058": {
+      "logical_addr": "dnn_main::SP+12",
+      "slot_addr": "0x6414",
+      "slot_symbol": "__SLOT_dnn_main_SP_12",
+      "addr_mode": "INDEXED",
+      "offset": 12,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W059": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W060": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W061": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W062": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W063": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W065": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W066": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W067": {
+      "logical_addr": "dnn_main::SP+10",
+      "slot_addr": "0x6412",
+      "slot_symbol": "__SLOT_dnn_main_SP_10",
+      "addr_mode": "INDEXED",
+      "offset": 10,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W068": {
+      "logical_addr": "dnn_main::SP+8",
+      "slot_addr": "0x6444",
+      "slot_symbol": "__SLOT_dnn_main_SP_8",
+      "addr_mode": "INDEXED",
+      "offset": 8,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W069": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W070": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W071": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W072": {
+      "logical_addr": "dnn_main::SP+16",
+      "slot_addr": "0x6418",
+      "slot_symbol": "__SLOT_dnn_main_SP_16",
+      "addr_mode": "INDEXED",
+      "offset": 16,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W073": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W074": {
+      "logical_addr": "dnn_main::SP+16",
+      "slot_addr": "0x6418",
+      "slot_symbol": "__SLOT_dnn_main_SP_16",
+      "addr_mode": "INDEXED",
+      "offset": 16,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W075": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W076": {
+      "logical_addr": "dnn_main::SP+16",
+      "slot_addr": "0x6418",
+      "slot_symbol": "__SLOT_dnn_main_SP_16",
+      "addr_mode": "INDEXED",
+      "offset": 16,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W077": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W078": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W079": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W080": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W081": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W082": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W083": {
+      "logical_addr": "dnn_main::SP+14",
+      "slot_addr": "0x6416",
+      "slot_symbol": "__SLOT_dnn_main_SP_14",
+      "addr_mode": "INDEXED",
+      "offset": 14,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W084": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W086": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W087": {
+      "logical_addr": "dnn_main::SP+34",
+      "slot_addr": "0x642C",
+      "slot_symbol": "__SLOT_dnn_main_SP_34",
+      "addr_mode": "INDEXED",
+      "offset": 34,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W088": {
+      "logical_addr": "dnn_main::SP+32",
+      "slot_addr": "0x642A",
+      "slot_symbol": "__SLOT_dnn_main_SP_32",
+      "addr_mode": "INDEXED",
+      "offset": 32,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W089": {
+      "logical_addr": "dnn_main::SP+30",
+      "slot_addr": "0x6428",
+      "slot_symbol": "__SLOT_dnn_main_SP_30",
+      "addr_mode": "INDEXED",
+      "offset": 30,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W090": {
+      "logical_addr": "dnn_main::SP+12",
+      "slot_addr": "0x6414",
+      "slot_symbol": "__SLOT_dnn_main_SP_12",
+      "addr_mode": "INDEXED",
+      "offset": 12,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W091": {
+      "logical_addr": "dnn_main::SP+28",
+      "slot_addr": "0x6426",
+      "slot_symbol": "__SLOT_dnn_main_SP_28",
+      "addr_mode": "INDEXED",
+      "offset": 28,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W092": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W093": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W094": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W095": {
+      "logical_addr": "dnn_main::SP+28",
+      "slot_addr": "0x6426",
+      "slot_symbol": "__SLOT_dnn_main_SP_28",
+      "addr_mode": "INDEXED",
+      "offset": 28,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W096": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W097": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W098": {
+      "logical_addr": "dnn_main::SP+30",
+      "slot_addr": "0x6428",
+      "slot_symbol": "__SLOT_dnn_main_SP_30",
+      "addr_mode": "INDEXED",
+      "offset": 30,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W099": {
+      "logical_addr": "dnn_main::SP+32",
+      "slot_addr": "0x642A",
+      "slot_symbol": "__SLOT_dnn_main_SP_32",
+      "addr_mode": "INDEXED",
+      "offset": 32,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W100": {
+      "logical_addr": "dnn_main::SP+34",
+      "slot_addr": "0x642C",
+      "slot_symbol": "__SLOT_dnn_main_SP_34",
+      "addr_mode": "INDEXED",
+      "offset": 34,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W101": {
+      "logical_addr": "dnn_main::SP+12",
+      "slot_addr": "0x6414",
+      "slot_symbol": "__SLOT_dnn_main_SP_12",
+      "addr_mode": "INDEXED",
+      "offset": 12,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W102": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W103": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W104": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W105": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W106": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W108": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W109": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W110": {
+      "logical_addr": "dnn_main::SP+20",
+      "slot_addr": "0x641E",
+      "slot_symbol": "__SLOT_dnn_main_SP_20",
+      "addr_mode": "INDEXED",
+      "offset": 20,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W111": {
+      "logical_addr": "dnn_main::SP+18",
+      "slot_addr": "0x641A",
+      "slot_symbol": "__SLOT_dnn_main_SP_18",
+      "addr_mode": "INDEXED",
+      "offset": 18,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W112": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W113": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W114": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W115": {
+      "logical_addr": "dnn_main::SP+16",
+      "slot_addr": "0x6418",
+      "slot_symbol": "__SLOT_dnn_main_SP_16",
+      "addr_mode": "INDEXED",
+      "offset": 16,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W116": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W117": {
+      "logical_addr": "dnn_main::SP+16",
+      "slot_addr": "0x6418",
+      "slot_symbol": "__SLOT_dnn_main_SP_16",
+      "addr_mode": "INDEXED",
+      "offset": 16,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W118": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W119": {
+      "logical_addr": "dnn_main::SP+16",
+      "slot_addr": "0x6418",
+      "slot_symbol": "__SLOT_dnn_main_SP_16",
+      "addr_mode": "INDEXED",
+      "offset": 16,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W120": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W121": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W122": {
+      "logical_addr": "dnn_main::SP+48",
+      "slot_addr": "0x643C",
+      "slot_symbol": "__SLOT_dnn_main_SP_48",
+      "addr_mode": "INDEXED",
+      "offset": 48,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W123": {
+      "logical_addr": "dnn_main::SP+50",
+      "slot_addr": "0x643E",
+      "slot_symbol": "__SLOT_dnn_main_SP_50",
+      "addr_mode": "INDEXED",
+      "offset": 50,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W124": {
+      "logical_addr": "dnn_main::SP+52",
+      "slot_addr": "0x6440",
+      "slot_symbol": "__SLOT_dnn_main_SP_52",
+      "addr_mode": "INDEXED",
+      "offset": 52,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W125": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W127": {
+      "logical_addr": "dnn_main::SP+26",
+      "slot_addr": "0x6424",
+      "slot_symbol": "__SLOT_dnn_main_SP_26",
+      "addr_mode": "INDEXED",
+      "offset": 26,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W128": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W129": {
+      "logical_addr": "dnn_main::SP+26",
+      "slot_addr": "0x6424",
+      "slot_symbol": "__SLOT_dnn_main_SP_26",
+      "addr_mode": "INDEXED",
+      "offset": 26,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W130": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W131": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W133": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W134": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W136": {
+      "logical_addr": "dnn_main::SP+24",
+      "slot_addr": "0x6422",
+      "slot_symbol": "__SLOT_dnn_main_SP_24",
+      "addr_mode": "INDEXED",
+      "offset": 24,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W137": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_addr": "0x6406",
+      "slot_symbol": "__SLOT_dnn_main_R12_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R12",
+      "type": "scalar",
+      "addr_slot_addr": "0x6408",
+      "addr_slot_symbol": "__ADDR_dnn_main_R12_0"
+    },
+    "W138": {
+      "logical_addr": "dnn_main::SP+24",
+      "slot_addr": "0x6422",
+      "slot_symbol": "__SLOT_dnn_main_SP_24",
+      "addr_mode": "INDEXED",
+      "offset": 24,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W139": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W140": {
+      "logical_addr": "dnn_main::SP+22",
+      "slot_addr": "0x6420",
+      "slot_symbol": "__SLOT_dnn_main_SP_22",
+      "addr_mode": "INDEXED",
+      "offset": 22,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W141": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W142": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W143": {
+      "logical_addr": "dnn_main::SP+22",
+      "slot_addr": "0x6420",
+      "slot_symbol": "__SLOT_dnn_main_SP_22",
+      "addr_mode": "INDEXED",
+      "offset": 22,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W144": {
+      "logical_addr": "dnn_main::SP+44",
+      "slot_addr": "0x6438",
+      "slot_symbol": "__SLOT_dnn_main_SP_44",
+      "addr_mode": "INDEXED",
+      "offset": 44,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W145": {
+      "logical_addr": "dnn_main::SP+46",
+      "slot_addr": "0x643A",
+      "slot_symbol": "__SLOT_dnn_main_SP_46",
+      "addr_mode": "INDEXED",
+      "offset": 46,
+      "base_reg": "R1",
+      "type": "scalar"
+    },
+    "W146": {
+      "logical_addr": "main::SP+0",
+      "slot_addr": "0x644E",
+      "slot_symbol": "__SLOT_main_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6450",
+      "addr_slot_symbol": "__ADDR_main_SP_0"
+    },
+    "W148": {
+      "logical_addr": "main::SP+0",
+      "slot_addr": "0x644E",
+      "slot_symbol": "__SLOT_main_SP_0",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "base_reg": "R1",
+      "type": "scalar",
+      "addr_slot_addr": "0x6450",
+      "addr_slot_symbol": "__ADDR_main_SP_0"
+    },
+    "W147": {
+      "logical_addr": "SRAM::count",
+      "slot_addr": "0x6462",
+      "slot_symbol": "__SLOT_SRAM_count",
+      "sram_addr": "count",
+      "addr_mode": "SRAM_GLOBAL",
+      "type": "sram_global"
+    },
+    "W046": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_symbol": "__backup_buf1_start",
+      "addr_mode": "INDIRECT",
+      "type": "array",
+      "array_name": "buf1",
+      "array_base": "0x6464"
+    },
+    "W064": {
+      "logical_addr": "dnn_main::R13+0",
+      "slot_symbol": "__backup_buf1_start",
+      "addr_mode": "INDIRECT",
+      "type": "array",
+      "array_name": "buf1",
+      "array_base": "0x6464"
+    },
+    "W132": {
+      "logical_addr": "dnn_main::R13+0",
+      "slot_symbol": "__backup_buf1_start",
+      "addr_mode": "INDIRECT",
+      "type": "array",
+      "array_name": "buf1",
+      "array_base": "0x6464"
+    },
+    "W085": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_symbol": "__backup_buf2_start",
+      "addr_mode": "INDIRECT",
+      "type": "array",
+      "array_name": "buf2",
+      "array_base": "0x684C"
+    },
+    "W107": {
+      "logical_addr": "dnn_main::R13+0",
+      "slot_symbol": "__backup_buf2_start",
+      "addr_mode": "INDIRECT",
+      "type": "array",
+      "array_name": "buf2",
+      "array_base": "0x684C"
+    },
+    "W126": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_symbol": "__backup_fc1_b_start",
+      "addr_mode": "INDIRECT",
+      "type": "array",
+      "array_name": "fc1_b",
+      "array_base": "0x6C34"
+    },
+    "W135": {
+      "logical_addr": "dnn_main::R12+0",
+      "slot_symbol": "__backup_fc2_b_start",
+      "addr_mode": "INDIRECT",
+      "type": "array",
+      "array_name": "fc2_b",
+      "array_base": "0x701C"
+    }
+  },
+  "stats": {
+    "total_wids": 148,
+    "scalar_wids": 41,
+    "sram_global_wids": 1,
+    "array_groups": 4,
+    "fram_bytes_used": 4100,
+    "fram_base": "0x6400",
+    "fram_end": "0x7404"
+  },
+  "array_mirrors": {},
+  "array_base_slots": {},
+  "next_addr": "0x6500",
+  "__SLOT_REG_R12": "0x6502",
+  "__SLOT_REG_R13": "0x6504",
+  "__SLOT_REG_R14": "0x6506"
+}

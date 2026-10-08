@@ -1,0 +1,83 @@
+# ============================================================================
+# ASAP LLVM IR 编译流程
+# ============================================================================
+# 在 LLVM IR 层面分析和插桩，不依赖特定编译器的汇编语法
+# 流程: C → LLVM IR → 分析store → 插桩IR → llc → gcc链接 → .out
+# ============================================================================
+
+# ===== 配置 =====
+MCU        ?= msp430fr5969
+BENCHMARK  ?= ar
+BUILD_DIR  ?= build_llvm
+CLANG      ?= /opt/homebrew/opt/llvm/bin/clang
+LLC        ?= /opt/homebrew/opt/llvm/bin/llc
+GCC        ?= msp430-elf-gcc
+PIPELINE   := Compiler_LLVM/run_llvm_pipeline.py
+CONFIG     ?= Compiler/bc_core_config.json
+
+# 根据BENCHMARK选择源文件
+ifeq ($(BENCHMARK), ar)
+    SRC := Benchmarks/ar/main_ar.c
+else ifeq ($(BENCHMARK), cf)
+    SRC := Benchmarks/cf/main_cf_plain.c
+else ifeq ($(BENCHMARK), bc)
+    SRC := Benchmarks/bc/main_bc.c
+else ifeq ($(BENCHMARK), crc)
+    SRC := Benchmarks/crc/main_crc_test_16.c
+else ifeq ($(BENCHMARK), conv)
+    SRC := Benchmarks/conv/main_conv_plain.c
+else
+    SRC := $(BENCHMARK)
+endif
+
+OUTPUT := $(BUILD_DIR)/firmware_llvm.out
+
+.PHONY: all llvm clean help
+
+all: llvm
+
+llvm: $(SRC)
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  ASAP LLVM IR 管线"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  源文件: $(SRC)"
+	@echo "  Clang:  $(CLANG)"
+	@echo "  LLC:    $(LLC)"
+	@echo "  GCC:    $(GCC)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	python3 $(PIPELINE) $(SRC) --output-dir $(BUILD_DIR) --gcc $(GCC) --clang $(CLANG)
+	@echo ""
+	@echo "✅ ASAP LLVM IR 编译完成！"
+	@ls -lh $(OUTPUT) 2>/dev/null || true
+
+clean:
+	rm -rf $(BUILD_DIR)
+	@echo "✓ 清理完成"
+
+help:
+	@echo "ASAP LLVM IR 管线 — 使用帮助"
+	@echo ""
+	@echo "用法:"
+	@echo "  make -f Makefile.llvm                     # 编译 AR benchmark"
+	@echo "  make -f Makefile.llvm BENCHMARK=bc        # 编译 BC benchmark"
+	@echo "  make -f Makefile.llvm SRC=my_prog.c       # 编译自定义程序"
+	@echo "  make -f Makefile.llvm clean               # 清理"
+	@echo ""
+	@echo "11 个 Stage:"
+	@echo "  1.  clang → LLVM IR (.ll)"
+	@echo "  2.  解析 IR (函数/store/alloca/call)"
+	@echo "  3.  识别关键写操作 (排除外设/init)"
+	@echo "  4.  FRAM 槽位分配"
+	@echo "  5.  IR 插桩 (插入备份 store)"
+	@echo "  6.  函数调用图构建"
+	@echo "  7.  状态生命周期分析"
+	@echo "  8.  恢复逻辑生成 (MSP430 汇编)"
+	@echo "  9.  编译插桩 IR → 目标文件 (llc + gcc)"
+	@echo "  10. 编译恢复逻辑 → 目标文件"
+	@echo "  11. 链接最终固件"
+	@echo ""
+	@echo "三套方案对比:"
+	@echo "  Makefile        源码级  GCC汇编分析     依赖GCC"
+	@echo "  Makefile.binary 二进制  ELF机器码分析   编译器无关"
+	@echo "  Makefile.llvm   IR级    LLVM IR分析     依赖LLVM"

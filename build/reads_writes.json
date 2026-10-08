@@ -1,0 +1,199 @@
+{
+  "writes": [
+    {
+      "pc": "0x97a2",
+      "function": "_uart_putc",
+      "addr_mode": "INDEXED",
+      "offset": 1,
+      "logical_addr": "_uart_putc::SP+1"
+    },
+    {
+      "pc": "0x97a6",
+      "function": "_uart_putc",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X6400"
+    },
+    {
+      "pc": "0x9940",
+      "function": "__WID_W015",
+      "addr_mode": "INDEXED",
+      "offset": 0,
+      "logical_addr": "__WID_W015::R12+0"
+    },
+    {
+      "pc": "0x9944",
+      "function": "__WID_W015",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X640E"
+    },
+    {
+      "pc": "0x9992",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0204"
+    },
+    {
+      "pc": "0x99a0",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0202"
+    },
+    {
+      "pc": "0x99a4",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0161"
+    },
+    {
+      "pc": "0x99ca",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X05C6"
+    },
+    {
+      "pc": "0x99ce",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X05C7"
+    },
+    {
+      "pc": "0x99e4",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X020D"
+    },
+    {
+      "pc": "0x99f4",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X020B"
+    },
+    {
+      "pc": "0xaa9a",
+      "function": "__WID_W146",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0202"
+    },
+    {
+      "pc": "0xaab6",
+      "function": "__WID_W146",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0202"
+    },
+    {
+      "pc": "0xac18",
+      "function": "memmove",
+      "addr_mode": "INDEXED",
+      "offset": 0,
+      "logical_addr": "memmove::R14+0"
+    },
+    {
+      "pc": "0xac3a",
+      "function": "memmove",
+      "addr_mode": "INDEXED",
+      "offset": 0,
+      "logical_addr": "memmove::R11+0"
+    },
+    {
+      "pc": "0xac4c",
+      "function": "memset",
+      "addr_mode": "INDEXED",
+      "offset": -1,
+      "logical_addr": "memset::R15+-1"
+    }
+  ],
+  "reads": [
+    {
+      "pc": "0x97a6",
+      "function": "_uart_putc",
+      "addr_mode": "INDEXED",
+      "offset": 1,
+      "logical_addr": "_uart_putc::SP+1"
+    },
+    {
+      "pc": "0x97c0",
+      "function": "__WID_W001",
+      "addr_mode": "INDEXED",
+      "offset": 1,
+      "logical_addr": "__WID_W001::SP+1"
+    },
+    {
+      "pc": "0x9808",
+      "function": "__WID_W003",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "logical_addr": "__WID_W003::R12+0"
+    },
+    {
+      "pc": "0x9810",
+      "function": "__WID_W003",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "logical_addr": "__WID_W003::R12+0"
+    },
+    {
+      "pc": "0x993e",
+      "function": "__WID_W015",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "logical_addr": "__WID_W015::R13+0"
+    },
+    {
+      "pc": "0x9944",
+      "function": "__WID_W015",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "logical_addr": "__WID_W015::R12+0"
+    },
+    {
+      "pc": "0x9988",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0204"
+    },
+    {
+      "pc": "0x9996",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0202"
+    },
+    {
+      "pc": "0x99d8",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X020D"
+    },
+    {
+      "pc": "0x99e8",
+      "function": "init",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X020B"
+    },
+    {
+      "pc": "0xaa90",
+      "function": "__WID_W146",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0202"
+    },
+    {
+      "pc": "0xaaac",
+      "function": "__WID_W146",
+      "addr_mode": "ABSOLUTE",
+      "logical_addr": "0X0202"
+    },
+    {
+      "pc": "0xac18",
+      "function": "memmove",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "logical_addr": "memmove::R13+0"
+    },
+    {
+      "pc": "0xac3a",
+      "function": "memmove",
+      "addr_mode": "INDIRECT",
+      "offset": 0,
+      "logical_addr": "memmove::R10+0"
+    }
+  ]
+}

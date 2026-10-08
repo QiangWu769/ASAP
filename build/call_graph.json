@@ -1,0 +1,852 @@
+{
+  "call_graph": {
+    "_uart_putc": {
+      "calls": [],
+      "stack_size": 2
+    },
+    "_uart_puts": {
+      "calls": [
+        "_uart_putc"
+      ],
+      "stack_size": 2
+    },
+    "f_mul": {
+      "calls": [],
+      "stack_size": 6
+    },
+    "conv1_wmd": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "conv1_wmh": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "conv1_wmv": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "conv1_b": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "conv2_w": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "conv2_b": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "fc1_w": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "fc1_b": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "fc2_w": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "fc2_b": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "input": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "my_memcpy": {
+      "calls": [],
+      "stack_size": 10
+    },
+    "buf1": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "buf2": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "init": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "dnn_main": {
+      "calls": [
+        "my_memcpy",
+        "f_mul"
+      ],
+      "stack_size": 56
+    },
+    "count": {
+      "calls": [],
+      "stack_size": 0
+    },
+    "main": {
+      "calls": [
+        "_uart_puts",
+        "dnn_main"
+      ],
+      "stack_size": 2
+    }
+  },
+  "wid_to_function": {
+    "W001": "_uart_putc",
+    "W002": "_uart_puts",
+    "W003": "_uart_puts",
+    "W004": "f_mul",
+    "W005": "f_mul",
+    "W006": "f_mul",
+    "W007": "f_mul",
+    "W008": "f_mul",
+    "W009": "my_memcpy",
+    "W010": "my_memcpy",
+    "W011": "my_memcpy",
+    "W012": "my_memcpy",
+    "W013": "my_memcpy",
+    "W014": "my_memcpy",
+    "W015": "my_memcpy",
+    "W016": "my_memcpy",
+    "W017": "my_memcpy",
+    "W018": "dnn_main",
+    "W019": "dnn_main",
+    "W020": "dnn_main",
+    "W021": "dnn_main",
+    "W022": "dnn_main",
+    "W023": "dnn_main",
+    "W024": "dnn_main",
+    "W025": "dnn_main",
+    "W026": "dnn_main",
+    "W027": "dnn_main",
+    "W028": "dnn_main",
+    "W029": "dnn_main",
+    "W030": "dnn_main",
+    "W031": "dnn_main",
+    "W032": "dnn_main",
+    "W033": "dnn_main",
+    "W034": "dnn_main",
+    "W035": "dnn_main",
+    "W036": "dnn_main",
+    "W037": "dnn_main",
+    "W038": "dnn_main",
+    "W039": "dnn_main",
+    "W040": "dnn_main",
+    "W041": "dnn_main",
+    "W042": "dnn_main",
+    "W043": "dnn_main",
+    "W044": "dnn_main",
+    "W045": "dnn_main",
+    "W046": "dnn_main",
+    "W047": "dnn_main",
+    "W048": "dnn_main",
+    "W049": "dnn_main",
+    "W050": "dnn_main",
+    "W051": "dnn_main",
+    "W052": "dnn_main",
+    "W053": "dnn_main",
+    "W054": "dnn_main",
+    "W055": "dnn_main",
+    "W056": "dnn_main",
+    "W057": "dnn_main",
+    "W058": "dnn_main",
+    "W059": "dnn_main",
+    "W060": "dnn_main",
+    "W061": "dnn_main",
+    "W062": "dnn_main",
+    "W063": "dnn_main",
+    "W064": "dnn_main",
+    "W065": "dnn_main",
+    "W066": "dnn_main",
+    "W067": "dnn_main",
+    "W068": "dnn_main",
+    "W069": "dnn_main",
+    "W070": "dnn_main",
+    "W071": "dnn_main",
+    "W072": "dnn_main",
+    "W073": "dnn_main",
+    "W074": "dnn_main",
+    "W075": "dnn_main",
+    "W076": "dnn_main",
+    "W077": "dnn_main",
+    "W078": "dnn_main",
+    "W079": "dnn_main",
+    "W080": "dnn_main",
+    "W081": "dnn_main",
+    "W082": "dnn_main",
+    "W083": "dnn_main",
+    "W084": "dnn_main",
+    "W085": "dnn_main",
+    "W086": "dnn_main",
+    "W087": "dnn_main",
+    "W088": "dnn_main",
+    "W089": "dnn_main",
+    "W090": "dnn_main",
+    "W091": "dnn_main",
+    "W092": "dnn_main",
+    "W093": "dnn_main",
+    "W094": "dnn_main",
+    "W095": "dnn_main",
+    "W096": "dnn_main",
+    "W097": "dnn_main",
+    "W098": "dnn_main",
+    "W099": "dnn_main",
+    "W100": "dnn_main",
+    "W101": "dnn_main",
+    "W102": "dnn_main",
+    "W103": "dnn_main",
+    "W104": "dnn_main",
+    "W105": "dnn_main",
+    "W106": "dnn_main",
+    "W107": "dnn_main",
+    "W108": "dnn_main",
+    "W109": "dnn_main",
+    "W110": "dnn_main",
+    "W111": "dnn_main",
+    "W112": "dnn_main",
+    "W113": "dnn_main",
+    "W114": "dnn_main",
+    "W115": "dnn_main",
+    "W116": "dnn_main",
+    "W117": "dnn_main",
+    "W118": "dnn_main",
+    "W119": "dnn_main",
+    "W120": "dnn_main",
+    "W121": "dnn_main",
+    "W122": "dnn_main",
+    "W123": "dnn_main",
+    "W124": "dnn_main",
+    "W125": "dnn_main",
+    "W126": "dnn_main",
+    "W127": "dnn_main",
+    "W128": "dnn_main",
+    "W129": "dnn_main",
+    "W130": "dnn_main",
+    "W131": "dnn_main",
+    "W132": "dnn_main",
+    "W133": "dnn_main",
+    "W134": "dnn_main",
+    "W135": "dnn_main",
+    "W136": "dnn_main",
+    "W137": "dnn_main",
+    "W138": "dnn_main",
+    "W139": "dnn_main",
+    "W140": "dnn_main",
+    "W141": "dnn_main",
+    "W142": "dnn_main",
+    "W143": "dnn_main",
+    "W144": "dnn_main",
+    "W145": "dnn_main",
+    "W146": "main",
+    "W147": "main",
+    "W148": "main"
+  },
+  "wid_call_stacks": {
+    "W001": [
+      "main",
+      "_uart_puts",
+      "_uart_putc"
+    ],
+    "W002": [
+      "main",
+      "_uart_puts"
+    ],
+    "W003": [
+      "main",
+      "_uart_puts"
+    ],
+    "W004": [
+      "main",
+      "dnn_main",
+      "f_mul"
+    ],
+    "W005": [
+      "main",
+      "dnn_main",
+      "f_mul"
+    ],
+    "W006": [
+      "main",
+      "dnn_main",
+      "f_mul"
+    ],
+    "W007": [
+      "main",
+      "dnn_main",
+      "f_mul"
+    ],
+    "W008": [
+      "main",
+      "dnn_main",
+      "f_mul"
+    ],
+    "W009": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W010": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W011": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W012": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W013": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W014": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W015": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W016": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W017": [
+      "main",
+      "dnn_main",
+      "my_memcpy"
+    ],
+    "W018": [
+      "main",
+      "dnn_main"
+    ],
+    "W019": [
+      "main",
+      "dnn_main"
+    ],
+    "W020": [
+      "main",
+      "dnn_main"
+    ],
+    "W021": [
+      "main",
+      "dnn_main"
+    ],
+    "W022": [
+      "main",
+      "dnn_main"
+    ],
+    "W023": [
+      "main",
+      "dnn_main"
+    ],
+    "W024": [
+      "main",
+      "dnn_main"
+    ],
+    "W025": [
+      "main",
+      "dnn_main"
+    ],
+    "W026": [
+      "main",
+      "dnn_main"
+    ],
+    "W027": [
+      "main",
+      "dnn_main"
+    ],
+    "W028": [
+      "main",
+      "dnn_main"
+    ],
+    "W029": [
+      "main",
+      "dnn_main"
+    ],
+    "W030": [
+      "main",
+      "dnn_main"
+    ],
+    "W031": [
+      "main",
+      "dnn_main"
+    ],
+    "W032": [
+      "main",
+      "dnn_main"
+    ],
+    "W033": [
+      "main",
+      "dnn_main"
+    ],
+    "W034": [
+      "main",
+      "dnn_main"
+    ],
+    "W035": [
+      "main",
+      "dnn_main"
+    ],
+    "W036": [
+      "main",
+      "dnn_main"
+    ],
+    "W037": [
+      "main",
+      "dnn_main"
+    ],
+    "W038": [
+      "main",
+      "dnn_main"
+    ],
+    "W039": [
+      "main",
+      "dnn_main"
+    ],
+    "W040": [
+      "main",
+      "dnn_main"
+    ],
+    "W041": [
+      "main",
+      "dnn_main"
+    ],
+    "W042": [
+      "main",
+      "dnn_main"
+    ],
+    "W043": [
+      "main",
+      "dnn_main"
+    ],
+    "W044": [
+      "main",
+      "dnn_main"
+    ],
+    "W045": [
+      "main",
+      "dnn_main"
+    ],
+    "W046": [
+      "main",
+      "dnn_main"
+    ],
+    "W047": [
+      "main",
+      "dnn_main"
+    ],
+    "W048": [
+      "main",
+      "dnn_main"
+    ],
+    "W049": [
+      "main",
+      "dnn_main"
+    ],
+    "W050": [
+      "main",
+      "dnn_main"
+    ],
+    "W051": [
+      "main",
+      "dnn_main"
+    ],
+    "W052": [
+      "main",
+      "dnn_main"
+    ],
+    "W053": [
+      "main",
+      "dnn_main"
+    ],
+    "W054": [
+      "main",
+      "dnn_main"
+    ],
+    "W055": [
+      "main",
+      "dnn_main"
+    ],
+    "W056": [
+      "main",
+      "dnn_main"
+    ],
+    "W057": [
+      "main",
+      "dnn_main"
+    ],
+    "W058": [
+      "main",
+      "dnn_main"
+    ],
+    "W059": [
+      "main",
+      "dnn_main"
+    ],
+    "W060": [
+      "main",
+      "dnn_main"
+    ],
+    "W061": [
+      "main",
+      "dnn_main"
+    ],
+    "W062": [
+      "main",
+      "dnn_main"
+    ],
+    "W063": [
+      "main",
+      "dnn_main"
+    ],
+    "W064": [
+      "main",
+      "dnn_main"
+    ],
+    "W065": [
+      "main",
+      "dnn_main"
+    ],
+    "W066": [
+      "main",
+      "dnn_main"
+    ],
+    "W067": [
+      "main",
+      "dnn_main"
+    ],
+    "W068": [
+      "main",
+      "dnn_main"
+    ],
+    "W069": [
+      "main",
+      "dnn_main"
+    ],
+    "W070": [
+      "main",
+      "dnn_main"
+    ],
+    "W071": [
+      "main",
+      "dnn_main"
+    ],
+    "W072": [
+      "main",
+      "dnn_main"
+    ],
+    "W073": [
+      "main",
+      "dnn_main"
+    ],
+    "W074": [
+      "main",
+      "dnn_main"
+    ],
+    "W075": [
+      "main",
+      "dnn_main"
+    ],
+    "W076": [
+      "main",
+      "dnn_main"
+    ],
+    "W077": [
+      "main",
+      "dnn_main"
+    ],
+    "W078": [
+      "main",
+      "dnn_main"
+    ],
+    "W079": [
+      "main",
+      "dnn_main"
+    ],
+    "W080": [
+      "main",
+      "dnn_main"
+    ],
+    "W081": [
+      "main",
+      "dnn_main"
+    ],
+    "W082": [
+      "main",
+      "dnn_main"
+    ],
+    "W083": [
+      "main",
+      "dnn_main"
+    ],
+    "W084": [
+      "main",
+      "dnn_main"
+    ],
+    "W085": [
+      "main",
+      "dnn_main"
+    ],
+    "W086": [
+      "main",
+      "dnn_main"
+    ],
+    "W087": [
+      "main",
+      "dnn_main"
+    ],
+    "W088": [
+      "main",
+      "dnn_main"
+    ],
+    "W089": [
+      "main",
+      "dnn_main"
+    ],
+    "W090": [
+      "main",
+      "dnn_main"
+    ],
+    "W091": [
+      "main",
+      "dnn_main"
+    ],
+    "W092": [
+      "main",
+      "dnn_main"
+    ],
+    "W093": [
+      "main",
+      "dnn_main"
+    ],
+    "W094": [
+      "main",
+      "dnn_main"
+    ],
+    "W095": [
+      "main",
+      "dnn_main"
+    ],
+    "W096": [
+      "main",
+      "dnn_main"
+    ],
+    "W097": [
+      "main",
+      "dnn_main"
+    ],
+    "W098": [
+      "main",
+      "dnn_main"
+    ],
+    "W099": [
+      "main",
+      "dnn_main"
+    ],
+    "W100": [
+      "main",
+      "dnn_main"
+    ],
+    "W101": [
+      "main",
+      "dnn_main"
+    ],
+    "W102": [
+      "main",
+      "dnn_main"
+    ],
+    "W103": [
+      "main",
+      "dnn_main"
+    ],
+    "W104": [
+      "main",
+      "dnn_main"
+    ],
+    "W105": [
+      "main",
+      "dnn_main"
+    ],
+    "W106": [
+      "main",
+      "dnn_main"
+    ],
+    "W107": [
+      "main",
+      "dnn_main"
+    ],
+    "W108": [
+      "main",
+      "dnn_main"
+    ],
+    "W109": [
+      "main",
+      "dnn_main"
+    ],
+    "W110": [
+      "main",
+      "dnn_main"
+    ],
+    "W111": [
+      "main",
+      "dnn_main"
+    ],
+    "W112": [
+      "main",
+      "dnn_main"
+    ],
+    "W113": [
+      "main",
+      "dnn_main"
+    ],
+    "W114": [
+      "main",
+      "dnn_main"
+    ],
+    "W115": [
+      "main",
+      "dnn_main"
+    ],
+    "W116": [
+      "main",
+      "dnn_main"
+    ],
+    "W117": [
+      "main",
+      "dnn_main"
+    ],
+    "W118": [
+      "main",
+      "dnn_main"
+    ],
+    "W119": [
+      "main",
+      "dnn_main"
+    ],
+    "W120": [
+      "main",
+      "dnn_main"
+    ],
+    "W121": [
+      "main",
+      "dnn_main"
+    ],
+    "W122": [
+      "main",
+      "dnn_main"
+    ],
+    "W123": [
+      "main",
+      "dnn_main"
+    ],
+    "W124": [
+      "main",
+      "dnn_main"
+    ],
+    "W125": [
+      "main",
+      "dnn_main"
+    ],
+    "W126": [
+      "main",
+      "dnn_main"
+    ],
+    "W127": [
+      "main",
+      "dnn_main"
+    ],
+    "W128": [
+      "main",
+      "dnn_main"
+    ],
+    "W129": [
+      "main",
+      "dnn_main"
+    ],
+    "W130": [
+      "main",
+      "dnn_main"
+    ],
+    "W131": [
+      "main",
+      "dnn_main"
+    ],
+    "W132": [
+      "main",
+      "dnn_main"
+    ],
+    "W133": [
+      "main",
+      "dnn_main"
+    ],
+    "W134": [
+      "main",
+      "dnn_main"
+    ],
+    "W135": [
+      "main",
+      "dnn_main"
+    ],
+    "W136": [
+      "main",
+      "dnn_main"
+    ],
+    "W137": [
+      "main",
+      "dnn_main"
+    ],
+    "W138": [
+      "main",
+      "dnn_main"
+    ],
+    "W139": [
+      "main",
+      "dnn_main"
+    ],
+    "W140": [
+      "main",
+      "dnn_main"
+    ],
+    "W141": [
+      "main",
+      "dnn_main"
+    ],
+    "W142": [
+      "main",
+      "dnn_main"
+    ],
+    "W143": [
+      "main",
+      "dnn_main"
+    ],
+    "W144": [
+      "main",
+      "dnn_main"
+    ],
+    "W145": [
+      "main",
+      "dnn_main"
+    ],
+    "W146": [
+      "main"
+    ],
+    "W147": [
+      "main"
+    ],
+    "W148": [
+      "main"
+    ]
+  }
+}

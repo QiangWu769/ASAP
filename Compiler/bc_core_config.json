@@ -1,0 +1,146 @@
+{
+  "description": "BC Benchmark 核心功能识别配置 - 排除输出相关代码",
+  
+  "exclude_functions": [
+    "INIT_CONSOLE",
+    "init",
+    "init_hw",
+    "clock_init",
+    "uart_init",
+    "_boot_putc_simple",
+    "mspconsole_init",
+    "UART_init",
+    "Timer0_B1_ISR",
+    "Timer_B0_ISR",
+    "TimerB0_ISR",
+    "TimerB1_ISR"
+  ],
+  
+  "comment_removed_uart_functions": "移除了UART业务函数的排除，使其在业务逻辑中可以注入WID",
+  "removed": [
+    "_uart_putc",
+    "_uart_puts", 
+    "_uart_print_uint",
+    "uart_putc",
+    "uart_puts",
+    "uart_print_uint",
+    "uart_putchar",
+    "uart_print_int",
+    "printf",
+    "puts",
+    "putc",
+    "putchar",
+    "UART_send",
+    "print_stats"
+  ],
+  
+  "exclude_peripherals": {
+    "comment": "保留UART寄存器，让业务逻辑中的UART写入可以注入WID",
+    "UART_registers_DISABLED": {
+      "comment": "已禁用UART排除，现在会为UART写入注入WID",
+      "UCA0CTLW0": "0x05C0",
+      "UCA0BRW": "0x05C6",
+      "UCA0MCTLW": "0x05C8",
+      "UCA0STATW": "0x05CA",
+      "UCA0RXBUF": "0x05CC",
+      "UCA0TXBUF": "0x05CC",
+      "UCA0IFG": "0x05CE",
+      "UCA0IE": "0x05D0"
+    },
+    "GPIO_for_UART_DISABLED": {
+      "comment": "GPIO配置通常在init函数内，init已被排除，所以这里不需要额外排除",
+      "P2SEL0": "0x020A",
+      "P2SEL1": "0x020B"
+    },
+    "GPIO_for_LED_DISABLED": {
+      "comment": "LED操作可能需要WID保护（如果在业务逻辑中使用）",
+      "P1OUT": "0x0202",
+      "P1DIR": "0x0204",
+      "P4OUT": "0x0223",
+      "P4DIR": "0x0225"
+    },
+    "Debug_FRAM_Area": {
+      "DEBUG_0x7100": "0x7100",
+      "DEBUG_0x7102": "0x7102",
+      "DEBUG_0x7104": "0x7104",
+      "DEBUG_0x7106": "0x7106",
+      "DEBUG_0x7108": "0x7108",
+      "DEBUG_0x710A": "0x710A",
+      "DEBUG_0x710C": "0x710C",
+      "DEBUG_0x710E": "0x710E",
+      "DEBUG_0x7110": "0x7110",
+      "DEBUG_0x7112": "0x7112",
+      "DEBUG_0x7114": "0x7114",
+      "DEBUG_0x7116": "0x7116",
+      "POR_COUNT_0x7200": "0x7200",
+      "comment": "调试FRAM区域，不插桩"
+    },
+    "Clock_for_output_only": {
+      "comment": "时钟初始化在bootloader中，这里不排除"
+    },
+    "Timer_B_registers": {
+      "TB0CTL": "0x0380",
+      "TB0CCTL0": "0x0382",
+      "TB0CCTL1": "0x0384",
+      "TB0CCTL2": "0x0386",
+      "TB0R": "0x0390",
+      "TB0CCR0": "0x0392",
+      "TB0CCR1": "0x0394",
+      "TB0CCR2": "0x0396",
+      "comment": "Timer B寄存器，用于软件复位触发"
+    },
+    "PMM_registers": {
+      "PMMCTL0": "0x0120",
+      "comment": "电源管理模块控制寄存器，写入无效密码触发PUC复位"
+    },
+    "ASAP_System_Variables": {
+      "ASAP_WID_SAVE": "0x7000",
+      "ASAP_PC_SAVE": "0x7002",
+      "ASAP_SP_SAVE": "0x7004",
+      "__asap_restored_flag": "0x1C00",
+      "hot_start_flag": "0x6850",
+      "comment": "ASAP系统内部状态变量，不应被备份/恢复"
+    },
+    "ASAP_Debug_Area": {
+      "DEBUG_FRAM_0x6800_to_0x6900": "0x6800",
+      "comment": "ASAP调试区域，不插桩"
+    }
+  },
+  
+  "bc_core_functions": [
+    "bit_count",
+    "bitcount",
+    "ntbl_bitcnt",
+    "ntbl_bitcount",
+    "BW_btbl_bitcount",
+    "AR_btbl_bitcount",
+    "bit_shifter",
+    "main"
+  ],
+  
+  "bc_core_data": {
+    "bits_table": {
+      "description": "256-byte lookup table",
+      "symbol": "bits"
+    },
+    "variables": [
+      "n_0", "n_1", "n_2", "n_3", "n_4", "n_5", "n_6",
+      "seed", "iter", "func", "cnt"
+    ]
+  },
+  
+  "analysis_rules": {
+    "rule_1": "排除所有 exclude_functions 中列出的函数内的指令",
+    "rule_2": "排除对 exclude_peripherals 中列出地址的写操作",
+    "rule_3": "只分析 bc_core_functions 中的函数",
+    "rule_4": "间接寻址源头追踪时，如果源自排除函数，则跳过"
+  }
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,497 @@
+#include <msp430.h>
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct {
+	uint8_t x;
+	uint8_t y;
+	uint8_t z;
+#ifdef __clang__
+	uint8_t padding; // clang crashes with type size mismatch assert failure
+#endif
+} threeAxis_t_8;
+
+#include <libio/builtins.h>
+
+// 简化版：直接定义宏，不需要外部库
+#ifdef LOGIC
+#define PRINTF(...)
+#define BLOCK_PRINTF(...)
+#define BLOCK_PRINTF_BEGIN(...)
+#define BLOCK_PRINTF_END(...)
+#define INIT_CONSOLE(...)
+#else
+#include <libio/log.h>
+#endif
+#include <libio/mem.h>
+#include <libio/msp-math.h>
+
+#include "param.h"
+#include "pins.h"
+// TIMER is defined by Makefile: -DTIMER=0 or -DTIMER=1
+
+__nv unsigned count = 0;
+__nv unsigned seed = 1;
+__nv unsigned cnt;
+
+// ===== 断电模拟变量（使用 FRAM 非易失性存储）=====
+#if TIMER == 1
+// ⭐ 定时器基于 VLOCLK (10kHz) / 8 = 1250 Hz
+// 周期 = count / 1250 (秒)
+// 示例: count=125 → 0.1秒, count=250 → 0.2秒
+#define min_pf 50  // 最小断电间隔: 50/1250 = 0.04秒 = 40ms
+__attribute__((section(".upper.noinit"))) int timer_count = 125;  // 初始值: 0.1秒
+__attribute__((section(".upper.noinit"))) volatile unsigned int random_num;
+__attribute__((section(".upper.noinit"))) int mod5_rand;
+#endif
+
+/* This is for progress reporting only */
+
+// Number of samples to discard before recording training set
+#define NUM_WARMUP_SAMPLES 3
+
+#define ACCEL_WINDOW_SIZE 3
+//#define ACCEL_WINDOW_SIZE 30
+#define MODEL_SIZE 16
+#define SAMPLE_NOISE_FLOOR 10 // TODO: made up value
+
+// Number of classifications to complete in one experiment
+#define SAMPLES_TO_COLLECT 8
+
+#ifdef ACCEL_16BIT_TYPE
+typedef threeAxis_t accelReading;
+#else // !ACCEL_16BIT_TYPE
+typedef threeAxis_t_8 accelReading;
+#endif // !ACCEL_16BIT_TYPE
+
+static void init_hw()
+{
+	// Disable watchdog timer
+	WDTCTL = WDTPW | WDTHOLD;
+	
+	// Unlock GPIO (for MSP430FR5969)
+	PM5CTL0 &= ~LOCKLPM5;
+	
+	// Setup clock to 8MHz DCO
+	CSCTL0_H = CSKEY_H;                    // Unlock CS registers
+	CSCTL1 = DCORSEL | DCOFSEL_3;          // Set DCO to 8MHz
+	CSCTL2 = SELA__VLOCLK | SELS_3 | SELM_3;  // ⭐ ACLK = VLOCLK (10kHz), SMCLK = MCLK = DCO
+	CSCTL3 = DIVA_0 | DIVS_0 | DIVM_0;     // Set all dividers to 1
+}
+
+#if TIMER == 1
+// Timer B1 interrupt handler with random power failure simulation
+__attribute__((interrupt(TIMER0_B1_VECTOR)))
+void TimerB1_ISR(void){
+	// 使用随机数生成下次断电时间（避免固定模式）
+	random_num = RTCPS;  // 读取 RTC 预分频器作为随机源
+	mod5_rand = random_num % 31;  // 0~30
+	random_num = min_pf + mod5_rand * 5;  // 范围: 50~200 (0.04s~0.16s)
+	timer_count = random_num;
+	
+	// 触发软件复位（模拟断电）
+	PMMCTL0 = PMMPW | PMMSWPOR;
+	BITSET(TBCTL, TBCLR);
+}
+#endif
+
+typedef accelReading accelWindow[ACCEL_WINDOW_SIZE];
+
+typedef struct {
+	unsigned meanmag;
+	unsigned stddevmag;
+} features_t;
+
+typedef enum {
+	CLASS_STATIONARY,
+	CLASS_MOVING,
+} class_t;
+
+typedef struct {
+	features_t stationary[MODEL_SIZE];
+	features_t moving[MODEL_SIZE];
+} model_t;
+
+typedef enum {
+	MODE_IDLE = 3,
+	MODE_TRAIN_STATIONARY = 2,
+	MODE_TRAIN_MOVING = 1,
+	MODE_RECOGNIZE = 0, // default
+} run_mode_t;
+
+typedef struct {
+	unsigned totalCount;
+	unsigned movingCount;
+	unsigned stationaryCount;
+} stats_t;
+
+void accel_sample(unsigned seed, accelReading* result){
+	result->x = (seed*17)%85;
+	result->y = (seed*17*17)%85;
+	result->z = (seed*17*17*17)%85;
+}
+
+void acquire_window(accelWindow window)
+{
+	accelReading sample;
+	unsigned samplesInWindow = 0;
+
+	while ( samplesInWindow < ACCEL_WINDOW_SIZE) {
+		accel_sample(seed, &sample);
+		seed++;
+		window[samplesInWindow++] = sample;
+	}
+}
+
+
+void transform(accelWindow window)
+{
+	unsigned i = 0;
+
+	for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
+		accelReading *sample = &window[i];
+
+		if (sample->x < SAMPLE_NOISE_FLOOR ||
+				sample->y < SAMPLE_NOISE_FLOOR ||
+				sample->z < SAMPLE_NOISE_FLOOR) {
+
+			sample->x = (sample->x > SAMPLE_NOISE_FLOOR) ? sample->x : 0;
+			sample->y = (sample->y > SAMPLE_NOISE_FLOOR) ? sample->y : 0;
+			sample->z = (sample->z > SAMPLE_NOISE_FLOOR) ? sample->z : 0;
+		}
+	}
+}
+
+
+void featurize(features_t *features, accelWindow aWin)
+{
+	accelReading mean;
+	accelReading stddev;
+
+	mean.x = mean.y = mean.z = 0;
+	stddev.x = stddev.y = stddev.z = 0;
+	int i;
+	for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
+		mean.x += aWin[i].x;  // x
+		mean.y += aWin[i].y;  // y
+		mean.z += aWin[i].z;  // z
+	}
+	/*
+		 mean.x = mean.x / ACCEL_WINDOW_SIZE;
+		 mean.y = mean.y / ACCEL_WINDOW_SIZE;
+		 mean.z = mean.z / ACCEL_WINDOW_SIZE;
+	 */
+	mean.x >>= 2;
+	mean.y >>= 2;
+	mean.z >>= 2;
+
+	for (i = 0; i < ACCEL_WINDOW_SIZE; i++) {
+		stddev.x += aWin[i].x > mean.x ? aWin[i].x - mean.x
+			: mean.x - aWin[i].x;  // x
+		stddev.y += aWin[i].y > mean.y ? aWin[i].y - mean.y
+			: mean.y - aWin[i].y;  // y
+		stddev.z += aWin[i].z > mean.z ? aWin[i].z - mean.z
+			: mean.z - aWin[i].z;  // z
+	}
+	/*
+		 stddev.x = stddev.x / (ACCEL_WINDOW_SIZE - 1);
+		 stddev.y = stddev.y / (ACCEL_WINDOW_SIZE - 1);
+		 stddev.z = stddev.z / (ACCEL_WINDOW_SIZE - 1);
+	 */
+	stddev.x >>= 2;
+	stddev.y >>= 2;
+	stddev.z >>= 2;
+
+	unsigned meanmag = mean.x*mean.x + mean.y*mean.y + mean.z*mean.z;
+	unsigned stddevmag = stddev.x*stddev.x + stddev.y*stddev.y + stddev.z*stddev.z;
+
+	features->meanmag   = sqrt16(meanmag);
+	features->stddevmag = sqrt16(stddevmag);
+}
+
+class_t classify(features_t *features, model_t *model)
+{
+	int move_less_error = 0;
+	int stat_less_error = 0;
+	features_t *model_features;
+	int i;
+
+	for (i = 0; i < MODEL_SIZE; ++i) {
+		model_features = &model->stationary[i];
+
+		long int stat_mean_err = (model_features->meanmag > features->meanmag)
+			? (model_features->meanmag - features->meanmag)
+			: (features->meanmag - model_features->meanmag);
+
+		long int stat_sd_err = (model_features->stddevmag > features->stddevmag)
+			? (model_features->stddevmag - features->stddevmag)
+			: (features->stddevmag - model_features->stddevmag);
+
+		model_features = &model->moving[i];
+
+		long int move_mean_err = (model_features->meanmag > features->meanmag)
+			? (model_features->meanmag - features->meanmag)
+			: (features->meanmag - model_features->meanmag);
+
+		long int move_sd_err = (model_features->stddevmag > features->stddevmag)
+			? (model_features->stddevmag - features->stddevmag)
+			: (features->stddevmag - model_features->stddevmag);
+
+		if (move_mean_err < stat_mean_err) {
+			move_less_error++;
+		} else {
+			stat_less_error++;
+		}
+
+		if (move_sd_err < stat_sd_err) {
+			move_less_error++;
+		} else {
+			stat_less_error++;
+		}
+	}
+
+	class_t class = move_less_error > stat_less_error ?
+		CLASS_MOVING : CLASS_STATIONARY;
+
+	return class;
+}
+
+void record_stats(stats_t *stats, class_t class)
+{
+	/* stats->totalCount, stats->movingCount, and stats->stationaryCount have an
+	 * nv-internal consistency requirement.  This code should be atomic. */
+
+	stats->totalCount++;
+
+	switch (class) {
+		case CLASS_MOVING:
+			stats->movingCount++;
+			break;
+
+		case CLASS_STATIONARY:
+			stats->stationaryCount++;
+			break;
+	}
+}
+
+void print_stats(stats_t *stats)
+{
+	unsigned resultStationaryPct = stats->stationaryCount * 100 / stats->totalCount;
+	unsigned resultMovingPct = stats->movingCount * 100 / stats->totalCount;
+
+	unsigned sum = stats->stationaryCount + stats->movingCount;
+
+	// 使用多个简单的PRINTF和PRINTF_UINT来输出完整信息
+	PRINTF("stats: s ");
+	PRINTF_UINT(stats->stationaryCount);
+	PRINTF(" (");
+	PRINTF_UINT(resultStationaryPct);
+	PRINTF("%) m ");
+	PRINTF_UINT(stats->movingCount);
+	PRINTF(" (");
+	PRINTF_UINT(resultMovingPct);
+	PRINTF("%) sum/tot ");
+	PRINTF_UINT(sum);
+	PRINTF("/");
+	PRINTF_UINT(stats->totalCount);
+	PRINTF(": ");
+	if (sum == stats->totalCount && sum == SAMPLES_TO_COLLECT) {
+		PRINTF("V\r\n");
+	} else {
+		PRINTF("X\r\n");
+	}
+}
+
+void warmup_sensor()
+{
+	unsigned discardedSamplesCount = 0;
+	accelReading sample;
+
+	while ( discardedSamplesCount++ < NUM_WARMUP_SAMPLES) {
+		accel_sample(seed, &sample);
+		seed++;
+	}
+}
+
+void train(features_t *classModel)
+{
+	accelWindow sampleWindow;
+	features_t features;
+	unsigned i;
+
+	warmup_sensor();
+
+	for (i = 0; i < MODEL_SIZE; ++i) {
+		acquire_window(sampleWindow);
+		transform(sampleWindow);
+		featurize(&features, sampleWindow);
+
+		classModel[i] = features;
+	}
+}
+
+void recognize(model_t *model)
+{
+	stats_t stats;
+	accelWindow sampleWindow;
+	features_t features;
+	class_t class;
+	unsigned i;
+
+	stats.totalCount = 0;
+	stats.stationaryCount = 0;
+	stats.movingCount = 0;
+
+	for (i = 0; i < SAMPLES_TO_COLLECT; ++i) {
+		acquire_window(sampleWindow);
+		transform(sampleWindow);
+		featurize(&features, sampleWindow);
+		class = classify(&features, model);
+		record_stats(&stats, class);
+	}
+
+	print_stats(&stats);
+	
+	// ===== 调试输出（写入FRAM供查看）=====
+	volatile uint16_t *debug_addr = (volatile uint16_t *)0x6600;
+	debug_addr[0] = i;
+	debug_addr[1] = stats.totalCount;
+	debug_addr[2] = stats.stationaryCount;
+	debug_addr[3] = stats.movingCount;
+	debug_addr[4] = 0xDEAD;  // 标记
+	debug_addr[5] = 0xBEEF;  // 标记
+	// 输出FRAM槽位的值
+	volatile uint16_t *fram_addr = (volatile uint16_t *)0x6610;
+	fram_addr[0] = *(volatile uint16_t *)0x645A;  // i的FRAM槽位
+	fram_addr[1] = *(volatile uint16_t *)0x6452;  // totalCount的FRAM槽位
+	fram_addr[2] = *(volatile uint16_t *)0x6454;  // stationaryCount的FRAM槽位
+	fram_addr[3] = *(volatile uint16_t *)0x6456;  // movingCount的FRAM槽位
+}
+
+run_mode_t select_mode(uint8_t *prev_pin_state)
+{
+	uint8_t pin_state = 1;
+
+	count++;
+	if(count >= 2) pin_state = 2;
+	if(count >= 3) pin_state = 0;
+	if(count >= 4) {
+		PRINTF("end\r\n");
+		cnt++;
+		if (cnt == LOOP_IDX) {
+//#ifdef LOGIC
+			// Out high
+//			GPIO(PORT_AUX, OUT) |= BIT(PIN_AUX_2);
+			// Out low
+//			GPIO(PORT_AUX, OUT) &= ~BIT(PIN_AUX_2);
+//#endif
+			// Program complete, halt
+			while(1);
+		}
+		count = 0;
+		seed = 1;
+		*prev_pin_state = MODE_IDLE;
+		pin_state = 99;
+	}
+	// Don't re-launch training after finishing training
+	if ((pin_state == MODE_TRAIN_STATIONARY ||
+				pin_state == MODE_TRAIN_MOVING) &&
+			pin_state == *prev_pin_state) {
+		pin_state = MODE_IDLE;
+	} else {
+		*prev_pin_state = pin_state;
+	}
+
+    // ===== 调试输出（恢复后的变量值）=====
+    volatile uint16_t *debug_addr = (volatile uint16_t *)0x6600;
+    debug_addr[0] = i;
+    debug_addr[1] = stats.totalCount;
+    debug_addr[2] = stats.class[0].count;
+    debug_addr[3] = stats.class[1].count;
+    debug_addr[4] = stats.class[0].totalClass;
+    debug_addr[5] = stats.class[1].totalClass;
+    // 输出FRAM槽位的值
+    volatile uint16_t *fram_addr = (volatile uint16_t *)0x6610;
+    fram_addr[0] = *(volatile uint16_t *)0x645A;  // i的FRAM槽位
+    fram_addr[1] = *(volatile uint16_t *)0x6452;  // totalCount的FRAM槽位
+    fram_addr[2] = *(volatile uint16_t *)0x6454;  // class[0].count的FRAM槽位
+    fram_addr[3] = *(volatile uint16_t *)0x6456;  // class[1].count的FRAM槽位
+    
+	return (run_mode_t)pin_state;
+}
+
+void init()
+{
+	init_hw();
+	INIT_CONSOLE();
+
+	__enable_interrupt();
+
+// #ifdef LOGIC
+// 	GPIO(PORT_AUX, OUT) &= ~BIT(PIN_AUX_2);
+
+// 	GPIO(PORT_AUX, OUT) &= ~BIT(PIN_AUX_1);
+// 	GPIO(PORT_AUX3, OUT) &= ~BIT(PIN_AUX_3);
+// 	// Output enabled
+// 	GPIO(PORT_AUX, DIR) |= BIT(PIN_AUX_1);
+// 	GPIO(PORT_AUX, DIR) |= BIT(PIN_AUX_2);
+// 	GPIO(PORT_AUX3, DIR) |= BIT(PIN_AUX_3);
+// 	//
+// 	// Out high
+// 	GPIO(PORT_AUX, OUT) |= BIT(PIN_AUX_2);
+// 	// Out low
+// 	GPIO(PORT_AUX, OUT) &= ~BIT(PIN_AUX_2);
+// #else
+	PRINTF("Init OK\r\n");
+// #endif
+
+#if TIMER == 1
+	// ⭐ 启动随机断电定时器（移到最后，确保初始化完成）
+	BITSET(TBCTL, (TBSSEL_1 | ID_3 | MC_2 | TBCLR));  // ACLK, /8, 连续模式
+	BITSET(TBCCTL1, CCIE);  // 使能中断
+	TBCCR1 = timer_count;   // 使用随机计数值（初始500，后续动态调整）
+#endif
+}
+
+int main()
+{
+	uint8_t prev_pin_state = MODE_IDLE;
+	model_t model;
+	
+	init();
+	cnt = 0;
+	
+	while (1) {
+		if (count == 0) {
+			if (cnt == 0) {
+// #ifdef LOGIC
+// 				// Out high
+// 				GPIO(PORT_AUX, OUT) |= BIT(PIN_AUX_1);
+// 				// Out low
+// 				GPIO(PORT_AUX, OUT) &= ~BIT(PIN_AUX_1);
+// #endif
+			}
+			PRINTF("start\r\n");
+		}
+
+		run_mode_t mode = select_mode(&prev_pin_state);
+		switch (mode) {
+			case MODE_TRAIN_STATIONARY:
+				train(model.stationary);
+				break;
+			case MODE_TRAIN_MOVING:
+				train(model.moving);
+				break;
+			case MODE_RECOGNIZE:
+				recognize(&model);
+				break;
+			default:
+				break;
+		}
+	}
+
+	return 0;
+}

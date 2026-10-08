@@ -1,0 +1,363 @@
+#!/usr/bin/env python3
+"""
+Stage 11: 生成恢复逻辑（表驱动）
+
+输入: build/pc_ranges.json
+输出: build/asap_restore.s
+"""
+
+import json
+import argparse
+from pathlib import Path
+
+def generate_restore_asm(pc_ranges_data, wid_pc_map, fram_slots_data, function_info, wid_backup_regs, output_path):
+    """生成汇编格式的恢复逻辑"""
+    
+    ranges = pc_ranges_data.get('ranges', [])
+    
+    with open(output_path, 'w') as f:
+        # 文件头
+        f.write('; ================================================\n')
+        f.write('; ASAP 恢复逻辑 - 表驱动实现\n')
+        f.write('; 自动生成 - 请勿手动编辑\n')
+        f.write('; ================================================\n\n')
+        
+        # 声明外部符号
+        f.write('    .global _asap_restore\n')
+        f.write('    .extern ASAP_WID_SAVE\n')
+        f.write('    .extern ASAP_SP_SAVE\n')
+        f.write('    .extern ASAP_PC_SAVE\n')
+        f.write('    .extern __asap_restored_flag\n\n')
+        
+        # 恢复表数据段
+        f.write('    .section .rodata\n')
+        f.write('    .align 2\n\n')
+        
+        # 收集所有函数名（用于声明SP外部符号）
+        all_functions = set()
+        
+        # 【修复】从pc_ranges直接使用restore_list（stage10的输出）
+        for item in ranges:
+            restore_list = item.get('restore_list', item.get('restore_addrs', []))
+            for var_item in restore_list:
+                logical_addr = var_item if isinstance(var_item, str) else var_item.get('logical_addr', '')
+                if '::SP+' in logical_addr:
+                    func_name = logical_addr.split('::SP+')[0]
+                    all_functions.add(func_name)
+        
+        # 为每个WID生成恢复表
+        f.write('; 恢复表：每个WID对应一个恢复列表\n')
+        for wid_data in ranges:
+            wid = wid_data['wid']
+            restore_list = wid_data.get('restore_list', [])
+            
+            f.write(f'_restore_list_{wid}:\n')
+            
+            # 确定这个WID主要操作哪个函数（用第一个变量的函数）
+            wid_function = None
+            if restore_list:
+                first_addr = restore_list[0]['logical_addr']
+                if '::SP+' in first_addr:
+                    wid_function = first_addr.split('::')[0]
+            
+            # 【修复】直接使用pc_ranges中的restore_list，不要自作主张扩展！
+            # stage10已经根据调用栈+生命周期+PC范围精心计算过了
+            
+            # 方案B：使用SP调整量代替函数SP符号
+            # 格式：[SP调整量, FRAM地址, 栈偏移]
+            # SP调整量 = 目标函数SP相对于断电点SP的偏移
+            max_offset_per_func = {}  # {func_name: max_offset}
+            
+            # 【关键修复】获取完整调用栈，用于计算每个函数的SP偏移
+            call_stack = wid_data.get('call_stack', [])
+            if not call_stack and wid_function:
+                call_stack = [wid_function]  # 降级：只有断电函数
+            
+            # 预计算每个函数的SP调整量（从断电点SP开始累加）
+            func_sp_adjustments = {}
+            current_adjustment = 0
+            
+            # 【关键】调用栈是从根到叶（main → ... → djb_hash），需要从后往前遍历
+            # 从断电函数（最后一个）开始，向上回溯到main（第一个）
+            for i in range(len(call_stack) - 1, -1, -1):
+                func_name = call_stack[i]
+                func_sp_adjustments[func_name] = current_adjustment
+                
+                # 如果不是根函数（有父函数），累加当前函数栈帧大小+返回地址
+                if i > 0:
+                    frame_size = function_info.get(func_name, {}).get('stack_size', 0)
+                    current_adjustment += frame_size + 2  # +2是返回地址
+            
+            # 【关键】完全跳过间接内存变量！
+            # 原因：record_stats::R12+0 实际上是 recognize::SP+X 的别名
+            # 通过恢复调用者（recognize）的栈帧，间接内存自动被恢复了
+            # 重复恢复会导致数据不一致！
+            skipped_indirect = 0
+            
+            for item in restore_list:
+                logical_addr = item.get('logical_addr', '')
+                slot_addr = item['slot_addr']
+                
+                # 跳过间接内存变量
+                if any(pattern in logical_addr for pattern in ['::R12+', '::R13+', '::R14+', '::R15+']):
+                    skipped_indirect += 1
+                    continue
+                
+                # 解析函数名和偏移
+                func_name = item.get('function')
+                offset = item.get('offset')
+                
+                if func_name is None or offset is None:
+                    if '::SP+' in logical_addr:
+                        func_name, offset_str = logical_addr.split('::SP+')
+                        offset = int(offset_str)
+                    else:
+                        func_name = wid_function or 'main'
+                        offset = 0
+                
+                # 使用预计算的SP调整量
+                sp_adjustment = func_sp_adjustments.get(func_name, 0)
+                
+                # 写入恢复项（新格式）
+                f.write(f'    .word {sp_adjustment}  ; SP调整量（相对ASAP_SP_SAVE）\n')
+                f.write(f'    .word {slot_addr}  ; FRAM槽位地址\n')
+                f.write(f'    .word {offset}     ; 栈偏移\n')
+                
+                # 跟踪每个函数的最大偏移
+                if func_name not in max_offset_per_func or offset > max_offset_per_func[func_name]:
+                    max_offset_per_func[func_name] = offset
+            
+            if skipped_indirect > 0:
+                f.write(f'    ; 跳过了 {skipped_indirect} 个间接内存变量（通过调用者栈恢复）\n')
+            
+            # 变量列表结束标记（使用0xFFFF以区分SP调整量0）
+            f.write(f'    .word 0xFFFF   ; 变量列表结束标记\n')
+            
+            # 返回地址信息（只针对子函数）
+            if wid_function and wid_function != 'main':
+                ret_symbol = f'RET_ADDR_{wid_function.upper()}'
+                # 使用函数的栈帧大小作为返回地址偏移（而不是max_offset+4）
+                func_info = function_info.get(wid_function, {})
+                ret_offset = func_info.get('stack_size', 0)
+                if ret_offset == 0:
+                    # 降级方案：使用max_offset+4（旧逻辑）
+                    max_offset = max_offset_per_func.get(wid_function, 0)
+                    ret_offset = max_offset + 4
+                # 返回地址的SP调整量：0（因为返回地址在断电函数的栈上）
+                f.write(f'    .word 0  ; SP调整量（返回地址在断电函数栈上）\n')
+                f.write(f'    .word {ret_symbol}  ; 返回地址FRAM地址\n')
+                f.write(f'    .word {ret_offset}  ; 返回地址栈偏移（函数栈帧大小）\n')
+            else:
+                f.write(f'    .word 0  ; 无返回地址（main）\n')
+                f.write(f'    .word 0\n')
+                f.write(f'    .word 0\n')
+            
+            # 从 wid_pc_map 获取恢复PC (只取低16位)
+            resume_pc_full = wid_pc_map.get(wid, '0x0000')
+            if resume_pc_full.startswith('0x') and len(resume_pc_full) > 6:
+                resume_pc = '0x' + resume_pc_full[-4:]  # 只取低16位
+            else:
+                resume_pc = resume_pc_full
+            f.write(f'    .word {resume_pc}  ; 恢复PC\n')
+            
+            # 结束标记（用于对齐/调试，实际不会读取）
+            f.write(f'    .word 0        ; 结束标记\n\n')
+        
+        # WID → 恢复表指针的跳转表
+        f.write('; WID跳转表：索引=WID-1, 值=恢复表地址\n')
+        f.write('_restore_table:\n')
+        for wid_data in ranges:
+            wid = wid_data['wid']
+            f.write(f'    .word _restore_list_{wid}\n')
+        
+        # 恢复逻辑代码
+        f.write('\n    .section .text\n')
+        f.write('    .align 2\n\n')
+        
+        f.write('_asap_restore:\n')
+        f.write('    ; 【调试标记】0xAA01 = 进入_asap_restore\n')
+        f.write('    MOV.W #0xAA01, &0x6500\n')
+        f.write('    ; 【修复】不使用栈保存寄存器！改用FRAM临时区域\n')
+        f.write('    ; 这样可以避免破坏断电时的栈帧\n')
+        f.write('    MOV.W R11, &0x645C     ; 保存R11到FRAM\n')
+        f.write('    MOV.W R12, &0x645E     ; 保存R12到FRAM\n')
+        f.write('    MOV.W R13, &0x6460     ; 保存R13到FRAM\n')
+        f.write('    MOV.W R14, &0x6462     ; 保存R14到FRAM\n')
+        f.write('    MOV.W R15, &0x6464     ; 保存R15到FRAM\n')
+        f.write('    ; 【调试标记】0xAA02 = 寄存器已保存\n')
+        f.write('    MOV.W #0xAA02, &0x6500\n\n')
+        
+        f.write('    ; 【修复】直接使用调用者传入的WID（R12），但要验证合理性\n')
+        f.write('    ; 保存原始WID到0x6560供调试\n')
+        f.write('    MOV.W R12, &0x6560\n')
+        f.write('    ; 如果WID不合理，改用ASAP_WID_SAVE\n')
+        f.write('    CMP.W #0, R12\n')
+        f.write('    JEQ _restore_use_fram_wid\n')
+        f.write(f'    CMP.W #{len(ranges)+1}, R12\n')
+        f.write('    JGE _restore_use_fram_wid\n')
+        f.write('    JMP _restore_wid_ok\n\n')
+        f.write('_restore_use_fram_wid:\n')
+        f.write('    ; R12的WID无效，从FRAM重新读取\n')
+        f.write('    MOV.W &ASAP_WID_SAVE, R12\n')
+        f.write('    CMP.W #0, R12\n')
+        f.write('    JEQ _restore_end           ; FRAM的WID也无效，放弃\n')
+        f.write(f'    CMP.W #{len(ranges)+1}, R12\n')
+        f.write('    JGE _restore_end\n\n')
+        f.write('_restore_wid_ok:\n')
+        f.write('    ; 【调试标记】0xAA03 = WID有效\n')
+        f.write('    MOV.W #0xAA03, &0x6500\n\n')
+        
+        f.write('    ; 计算恢复表地址：table[WID-1]\n')
+        f.write('    DEC.W R12\n')
+        f.write('    RLA.W R12              ; R12 *= 2 (字对齐)\n')
+        f.write('    ADD.W #_restore_table, R12\n')
+        f.write('    MOV.W @R12, R14        ; R14 = 恢复表指针\n')
+        f.write('    ; 【调试标记】0xAA04 = 找到恢复表\n')
+        f.write('    MOV.W #0xAA04, &0x6500\n\n')
+        
+        f.write('_restore_items:\n')
+        f.write('    ; 【调试标记】0xAA05 = 进入恢复循环（每个变量会输出）\n')
+        f.write('    MOV.W #0xAA05, &0x6500\n')
+        f.write('    ; 格式：[SP调整量, FRAM地址, 偏移]\n')
+        f.write('    MOV.W @R14+, R15           ; R15 = SP调整量（或0xFFFF）\n')
+        f.write('    CMP.W #0xFFFF, R15         ; 使用0xFFFF作为结束标记\n')
+        f.write('    JEQ _restore_return_addr   ; 所有变量恢复完\n\n')
+        
+        f.write('    ; 计算目标函数的SP：ASAP_SP_SAVE + SP调整量\n')
+        f.write('    MOV.W &ASAP_SP_SAVE, R11   ; R11 = 断电点SP\n')
+        f.write('    ADD.W R15, R11             ; R11 = 目标函数SP\n\n')
+        
+        f.write('    ; 读取FRAM槽位地址和值\n')
+        f.write('    MOV.W @R14+, R15           ; R15 = FRAM槽位地址\n')
+        f.write('    MOV.W @R15, R13            ; R13 = 从FRAM读取的值\n\n')
+        
+        f.write('    ; 读取栈偏移\n')
+        f.write('    MOV.W @R14+, R15           ; R15 = 变量偏移\n\n')
+        
+        f.write('    ; 计算目标地址并恢复\n')
+        f.write('    ADD.W R11, R15             ; R15 = 目标函数SP + 变量偏移\n')
+        f.write('    ; 【安全检查+调试】防止写入高地址\n')
+        f.write('    MOV.W R15, &0x6580         ; 保存计算的目标地址到FRAM供调试\n')
+        f.write('    CMP.W #0x2400, R15         ; 检查是否超出RAM\n')
+        f.write('    JHS _restore_items         ; 如果超出，跳过写入\n')
+        f.write('    CMP.W #0x1C00, R15         ; 检查是否低于RAM起始\n')
+        f.write('    JLO _restore_items         ; 如果低于，跳过写入\n')
+        f.write('    MOV.W R13, 0(R15)          ; 写入RAM\n')
+        f.write('    JMP _restore_items\n\n')
+        
+        f.write('_restore_return_addr:\n')
+        f.write('    ; 【调试标记】0xAA06 = 所有变量恢复完，处理返回地址\n')
+        f.write('    MOV.W #0xAA06, &0x6500\n')
+        f.write('    ; R14现在指向返回地址信息：[SP调整量, RET_ADDR符号, 偏移, PC, 0]\n')
+        f.write('    MOV.W @R14+, R15       ; R15 = SP调整量\n')
+        f.write('    MOV.W @R14+, R10       ; R10 = RET_ADDR符号地址\n')
+        f.write('    CMP.W #0, R10          ; 先检查是否有返回地址\n')
+        f.write('    JEQ _restore_skip_ret_addr    ; 无返回地址→跳过读取偏移\n\n')
+        f.write('    ; 有返回地址，继续读取偏移\n')
+        f.write('    MOV.W @R14+, R9        ; R9 = 返回地址栈偏移\n')
+        f.write('    ; 计算断电函数的SP：ASAP_SP_SAVE + SP调整量\n')
+        f.write('    MOV.W &ASAP_SP_SAVE, R11   ; R11 = 断电点SP\n')
+        f.write('    ADD.W R15, R11             ; R11 = 断电函数SP（这里R15应该是0）\n\n')
+        f.write('    ; 读取返回地址\n')
+        f.write('    MOV.W @R10, R13        ; R13 = FRAM中的返回地址\n')
+        f.write('    ; 计算栈上返回地址位置并恢复（R9已经包含偏移）\n')
+        f.write('    ADD.W R11, R9          ; R9 = 断电函数SP + offset\n')
+        f.write('    ; 【安全检查+调试】防止写入高地址（如0xFFFE）\n')
+        f.write('    MOV.W R9, &0x6590      ; 保存返回地址目标位置到FRAM供调试\n')
+        f.write('    CMP.W #0x2400, R9      ; 检查R9是否超出RAM范围\n')
+        f.write('    JHS _restore_skip_ret_addr  ; 如果R9 >= 0x2400，跳过写入\n')
+        f.write('    CMP.W #0x1C00, R9      ; 检查R9是否低于RAM起始\n')
+        f.write('    JLO _restore_skip_ret_addr  ; 如果R9 < 0x1C00，跳过写入\n')
+        f.write('    MOV.W R13, 0(R9)       ; 恢复返回地址到栈上\n')
+        f.write('    ; 【调试标记】0xAA07 = 返回地址已恢复\n')
+        f.write('    MOV.W #0xAA07, &0x6500\n')
+        f.write('    JMP _restore_get_pc\n\n')
+        f.write('_restore_skip_ret_addr:\n')
+        f.write('    ; main函数无返回地址，跳过偏移字段\n')
+        f.write('    ADD.W #2, R14          ; R14跳过偏移字段\n\n')
+        f.write('_restore_get_pc:\n')
+        f.write('    ; 【调试标记】0xAA08 = 准备设置PC\n')
+        f.write('    MOV.W #0xAA08, &0x6500\n')
+        f.write('    ; 【调试】保存R14指针位置到0x6570\n')
+        f.write('    MOV.W R14, &0x6570\n')
+        f.write('    ; 读取恢复PC (R14指向恢复PC)\n')
+        f.write('    MOV.W @R14, R15\n')
+        f.write('    ; 【调试】保存读取的PC到0x6472\n')
+        f.write('    MOV.W R15, &0x6472\n')
+        f.write('    MOV.W R15, &ASAP_PC_SAVE   ; 设置跳转PC（从WID表）\n\n')
+        
+        f.write('_restore_end:\n')
+        f.write('    ; 【调试标记】0xAA09 = 准备恢复执行\n')
+        f.write('    MOV.W #0xAA09, &0x6500\n')
+        f.write('    ; 【调试】输出FRAM槽位中的原始值（恢复前）\n')
+        f.write('    MOV.W &0x645A, &0x6610  ; i的FRAM槽位值 -> 0x6610\n')
+        f.write('    MOV.W &0x6452, &0x6612  ; stats.totalCount的FRAM槽位值 -> 0x6612\n')
+        f.write('    MOV.W &0x6454, &0x6614  ; stats.class[0].count的FRAM槽位值 -> 0x6614\n')
+        f.write('    MOV.W &0x6456, &0x6616  ; stats.class[1].count的FRAM槽位值 -> 0x6616\n')
+        f.write('    ; 【关键修复】不返回！直接在这里恢复SP和跳转\n')
+        f.write('    ; 这样避免RET指令，防止返回地址被破坏\n')
+        f.write('    ; 标记：设置"已恢复"标志\n')
+        f.write('    MOV.W #0x1234, &__asap_restored_flag\n')
+        f.write('    ; 【调试标记】0xAA10 = 准备恢复SP\n')
+        f.write('    MOV.W #0xAA10, &0x6500\n')
+        f.write('    ; 恢复栈指针\n')
+        f.write('    MOV.W &ASAP_SP_SAVE, R1\n')
+        f.write('    ; 【调试】输出恢复后的关键变量值到FRAM\n')
+        f.write('    ; recognize函数的关键栈变量：\n')
+        f.write('    MOV.W 24(R1), &0x6600  ; i (循环变量) -> 0x6600\n')
+        f.write('    MOV.W 16(R1), &0x6602  ; stats.totalCount -> 0x6602\n')
+        f.write('    MOV.W 18(R1), &0x6604  ; stats.class[0].count -> 0x6604\n')
+        f.write('    MOV.W 20(R1), &0x6606  ; stats.class[1].count -> 0x6606\n')
+        f.write('    MOV.W 22(R1), &0x6608  ; stats.class[0].totalClass -> 0x6608\n')
+        f.write('    MOV.W 26(R1), &0x660A  ; stats.class[1].totalClass -> 0x660A\n')
+        f.write('    ; 【关键修复】不恢复R11-R15！\n')
+        f.write('    ; 这些寄存器应该由业务代码重新设置，而不是使用恢复逻辑的临时值\n')
+        f.write('    ; 【调试标记】0xAA11 = 准备跳转（不恢复工作寄存器）\n')
+        f.write('    MOV.W #0xAA11, &0x6500\n')
+        f.write('    ; 【调试标记】0xAA12 = 准备跳转\n')
+        f.write('    MOV.W #0xAA12, &0x6500\n')
+        f.write('    ; 【调试】将PC值写到0x6560供检查\n')
+        f.write('    MOV.W &ASAP_PC_SAVE, R15\n')
+        f.write('    MOV.W R15, &0x6560     ; 保存PC到FRAM用于调试\n')
+        f.write('    ; 跳转到断电位置\n')
+        f.write('    BR R15                 ; 直接跳转，不返回！\n\n')
+
+def main():
+    parser = argparse.ArgumentParser(description='Stage 11: 生成恢复逻辑')
+    parser.add_argument('--pc-ranges', required=True, help='PC ranges JSON文件')
+    parser.add_argument('--wid-pc-map', default='build/wid_pc_map.json', help='WID→PC映射文件')
+    parser.add_argument('--fram-slots', default='build/fram_slots.json', help='FRAM槽位分配文件')
+    parser.add_argument('--function-info', default='build/function_info.json', help='函数信息文件')
+    parser.add_argument('--output', required=True, help='输出汇编文件')
+    parser.add_argument('--format', default='asm', choices=['asm'], help='输出格式')
+    
+    args = parser.parse_args()
+    
+    # 读取输入
+    with open(args.pc_ranges, 'r') as f:
+        pc_ranges_data = json.load(f)
+    
+    with open(args.wid_pc_map, 'r') as f:
+        wid_pc_map = json.load(f)
+    
+    with open(args.fram_slots, 'r') as f:
+        fram_slots_data = json.load(f)
+    
+    with open(args.function_info, 'r') as f:
+        function_info = json.load(f)
+    
+    # 读取寄存器备份元数据
+    wid_backup_regs = {}
+    try:
+        with open('build/wid_backup_regs.json', 'r') as f:
+            wid_backup_regs = json.load(f)
+    except FileNotFoundError:
+        print("  ⚠️ 未找到 wid_backup_regs.json，跳过寄存器恢复优化")
+    
+    # 生成恢复逻辑
+    generate_restore_asm(pc_ranges_data, wid_pc_map, fram_slots_data, function_info, wid_backup_regs, args.output)
+    
+    print(f'  ✓ 恢复逻辑生成完成: {args.output}')
+
+if __name__ == '__main__':
+    main()

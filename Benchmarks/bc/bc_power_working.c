@@ -1,0 +1,185 @@
+/*
+ * BC Power Failure Test - Working Version
+ * 参考bc(1).out的Timer中断定义方式
+ */
+
+#include <msp430.h>
+#include <stdint.h>
+#include <libio/log.h>
+
+#define LOOP_IDX 1
+#define SEED 4L
+#define ITER 100
+#define CHAR_BIT 8
+
+// FRAM持久化变量
+static volatile uint16_t __attribute__((section(".persistent"))) pf_counter = 0;
+
+/* Bit count lookup table */
+static const char bits[256] =
+{
+	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
+};
+
+/* BC Algorithm 1: Bit Count */
+unsigned bit_count(uint32_t x)
+{
+	unsigned n = 0;
+	if (x) do n++; while (0 != (x = x&(x-1)));
+	return n;
+}
+
+/* BC Algorithm 2: Bitcount */
+unsigned bitcount(uint32_t x)
+{
+	unsigned n = 0;
+	unsigned char *p = (unsigned char*)&x;
+	n += bits[p[0]] + bits[p[1]] + bits[p[2]] + bits[p[3]];
+	return n;
+}
+
+/* BC Algorithm 3: ntbl_bitcnt */
+unsigned ntbl_bitcnt(uint32_t x)
+{
+	return bits[(unsigned char)x] +
+	       bits[(unsigned char)(x>>8)] +
+	       bits[(unsigned char)(x>>16)] +
+	       bits[(unsigned char)(x>>24)];
+}
+
+/* BC Algorithm 4: ntbl_bitcount */
+unsigned ntbl_bitcount(uint32_t x)
+{
+	return (bits[(unsigned char)x] +
+	        bits[(unsigned char)(x>>8)] +
+	        bits[(unsigned char)(x>>16)] +
+	        bits[(unsigned char)(x>>24)]);
+}
+
+/* BC Algorithm 5: BW_btbl_bitcount */
+unsigned BW_btbl_bitcount(uint32_t x)
+{
+	union {
+		unsigned char ch[4];
+		uint32_t x;
+	} U;
+	U.x = x;
+	return bits[U.ch[0]] + bits[U.ch[1]] + bits[U.ch[2]] + bits[U.ch[3]];
+}
+
+/* BC Algorithm 6: AR_btbl_bitcount */
+unsigned AR_btbl_bitcount(uint32_t x)
+{
+	unsigned char *Ptr = (unsigned char *)&x;
+	unsigned Accu = bits[*Ptr++];
+	Accu += bits[*Ptr++];
+	Accu += bits[*Ptr++];
+	return Accu + bits[*Ptr];
+}
+
+/* Main test loop */
+int main()
+{
+	/* 阶段2：进入main - 红灯熄灭，只留绿灯 */
+	*(volatile unsigned char*)0x0202 &= ~0x01;  /* P1OUT &= ~BIT0 (红灯灭) */
+	
+	INIT_CONSOLE();  // Initialize output hardware
+
+	PRINTF("MAIN_V2\r\n");
+	
+	// 输出断电计数器和WID
+	extern volatile uint16_t ASAP_WID_SAVE;
+	PRINTF("PF_Counter=");
+	PRINTF_UINT(pf_counter);
+	PRINTF(" WID_Now=");
+	PRINTF_UINT(ASAP_WID_SAVE);
+	PRINTF("\r\n");
+	
+	// 启动Timer（仅第一次）
+	// 热启动后不再启动Timer，让程序正常执行完
+	if (pf_counter == 0) {
+		pf_counter = 1;
+		// 配置Timer B0
+		TBCTL = TBSSEL__ACLK | ID__8 | MC__CONTINUOUS | TBCLR;
+		TBCCTL1 = CCIE;
+		TBCCR1 = 50;
+		__enable_interrupt();
+		PRINTF(">>> Power Failure Timer ARMED <<<\r\n");
+	} else {
+		PRINTF(">>> RECOVERED from WID=");
+		PRINTF_UINT(ASAP_WID_SAVE);
+		PRINTF(" <<<\r\n");
+	}
+	
+	PRINTF("INIT 0 START\r\n");
+	
+	uint32_t seed = (uint32_t)SEED;
+	
+	for (int func = 0; func < 7; func++) {
+		PRINTF("F");
+		PRINTF_UINT(func);
+		PRINTF("\r\n");
+		
+		uint32_t n_0 = 0, n_1 = 0, n_2 = 0, n_3 = 0, n_4 = 0, n_5 = 0, n_6 = 0;
+		
+		for (int i = 0; i < ITER; i++) {
+			PRINTF("n");
+			PRINTF_UINT(i);
+			PRINTF(" ");
+			PRINTF_UINT(seed & 0xFFFF);
+			PRINTF("\r\n");
+			
+			if(func == 0) {
+				n_0 += bit_count(seed);
+			} else if(func == 1) {
+				n_1 += bitcount(seed);
+			} else if(func == 2) {
+				n_2 += ntbl_bitcnt(seed);
+			} else if(func == 3) {
+				n_3 += ntbl_bitcount(seed);
+			} else if(func == 4) {
+				n_4 += BW_btbl_bitcount(seed);
+			} else if(func == 5) {
+				n_5 += AR_btbl_bitcount(seed);
+			}
+			
+			seed += 13;
+		}
+		
+		PRINTF("end ");
+		PRINTF_UINT(seed & 0xFFFF);
+		PRINTF("\r\n");
+	}
+	
+	// 输出最终WID
+	PRINTF(" WID=");
+	PRINTF_UINT(ASAP_WID_SAVE);
+	PRINTF("\r\n");
+	
+	return 0;
+}
+
+// Timer中断：触发软件复位（只用手动中断向量定义）
+void TimerB1_ISR(void) {
+	PMMCTL0 = PMMPW | PMMSWPOR;
+	TBCTL |= TBCLR;
+}
+
+// 手动定义中断向量（参考bc(1).out）
+__attribute__((section("__interrupt_vector_timer0_b1"),aligned(2)))
+void(*__vector_timer0_b1)(void) = TimerB1_ISR;

@@ -1,0 +1,186 @@
+/*
+ * Clean BC Benchmark - Pure Algorithm Implementation
+ * Simplified version without complex conditionals
+ */
+
+#include <msp430.h>
+#include <stdint.h>
+#include <libio/log.h>
+
+#define LOOP_IDX 1
+#define SEED 4L
+#define ITER 100
+#define CHAR_BIT 8
+
+/* Bit count lookup table */
+static const char bits[256] =
+{
+	0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
+	4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
+};
+
+/* BC Algorithm 1: Bit Count */
+unsigned bit_count(uint32_t x)
+{
+	unsigned n = 0;
+	if (x) do n++; while (0 != (x = x&(x-1)));
+	return n;
+}
+
+/* BC Algorithm 2: Parallel Bit Count */
+int bitcount(uint32_t i)
+{
+	i = ((i & 0xAAAAAAAAL) >>  1) + (i & 0x55555555L);
+	i = ((i & 0xCCCCCCCCL) >>  2) + (i & 0x33333333L);
+	i = ((i & 0xF0F0F0F0L) >>  4) + (i & 0x0F0F0F0FL);
+	i = ((i & 0xFF00FF00L) >>  8) + (i & 0x00FF00FFL);
+	i = ((i & 0xFFFF0000L) >> 16) + (i & 0x0000FFFFL);
+	return (int)i;
+}
+
+/* BC Algorithm 3: Non-recursive Nibble Table */
+int ntbl_bitcnt(uint32_t x)
+{
+	int cnt = bits[(int)(x & 0x0000000FL)];
+	while (0L != (x >>= 4))
+		cnt += bits[(int)(x & 0x0000000FL)];
+	return cnt;
+}
+
+/* BC Algorithm 4: Nibble Table (unrolled) */
+int ntbl_bitcount(uint32_t x)
+{
+	return
+		bits[ (int) (x & 0x0000000FUL)       ] +
+		bits[ (int)((x & 0x000000F0UL) >> 4) ] +
+		bits[ (int)((x & 0x00000F00UL) >> 8) ] +
+		bits[ (int)((x & 0x0000F000UL) >> 12)] +
+		bits[ (int)((x & 0x000F0000UL) >> 16)] +
+		bits[ (int)((x & 0x00F00000UL) >> 20)] +
+		bits[ (int)((x & 0x0F000000UL) >> 24)] +
+		bits[ (int)((x & 0xF0000000UL) >> 28)];
+}
+
+/* BC Algorithm 5: Byte-wise Table (union) */
+int BW_btbl_bitcount(uint32_t x)
+{
+	union { unsigned char ch[4]; long y; } U;
+	U.y = x;
+	return bits[U.ch[0]] + bits[U.ch[1]] + bits[U.ch[3]] + bits[U.ch[2]];
+}
+
+/* BC Algorithm 6: Array/Pointer Byte Table */
+int AR_btbl_bitcount(uint32_t x)
+{
+	unsigned char *Ptr = (unsigned char *)&x;
+	int Accu;
+	Accu  = bits[*Ptr++];
+	Accu += bits[*Ptr++];
+	Accu += bits[*Ptr++];
+	Accu += bits[*Ptr];
+	return Accu;
+}
+
+/* BC Algorithm 7: Bit Shifter */
+static int bit_shifter(uint32_t x)
+{
+	int i, n;
+	for (i = n = 0; x && (i < (sizeof(uint32_t) * CHAR_BIT)); ++i, x >>= 1)
+		n += (int)(x & 1L);
+	return n;
+}
+
+/* Main test loop */
+int main()
+{
+	INIT_CONSOLE();  // Initialize output hardware
+	
+	unsigned n_0, n_1, n_2, n_3, n_4, n_5, n_6;
+	uint32_t seed;
+	unsigned iter, func;
+	
+    PRINTF("MAIN_V2\r\n");  // 版本标记：确认新固件
+
+    while (1) {
+        for (unsigned cnt = 0; cnt < LOOP_IDX; ++cnt) {
+            n_0 = n_1 = n_2 = n_3 = n_4 = n_5 = n_6 = 0;
+            
+            // 调试：检查初始化后的值
+            PRINTF("INIT ");
+            PRINTF_UINT(n_1);
+            PRINTF("\r\n");
+            
+            PRINTF("START\r\n");
+
+			for (func = 0; func < 7; func++) {
+				// 输出当前执行的算法编号
+				PRINTF("F");
+				PRINTF_UINT(func);
+				PRINTF("\r\n");
+				
+				seed = (uint32_t)SEED;
+				
+			if(func == 0) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_0 += bit_count(seed);
+				PRINTF("n0 "); PRINTF_UINT(n_0); PRINTF("\r\n");
+			}
+			else if(func == 1) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_1 += bitcount(seed);
+				PRINTF("n1 "); PRINTF_UINT(n_1); PRINTF("\r\n");
+			}
+			else if(func == 2) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_2 += ntbl_bitcnt(seed);
+				PRINTF("n2 "); PRINTF_UINT(n_2); PRINTF("\r\n");
+			}
+			else if(func == 3) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_3 += ntbl_bitcount(seed);
+				PRINTF("n3 "); PRINTF_UINT(n_3); PRINTF("\r\n");
+			}
+			else if(func == 4) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_4 += BW_btbl_bitcount(seed);
+				PRINTF("n4 "); PRINTF_UINT(n_4); PRINTF("\r\n");
+			}
+			else if(func == 5) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_5 += AR_btbl_bitcount(seed);
+				PRINTF("n5 "); PRINTF_UINT(n_5); PRINTF("\r\n");
+			}
+			else if(func == 6) {
+				for(iter = 0; iter < ITER; ++iter, seed += 13)
+					n_6 += bit_shifter(seed);
+				PRINTF("n6 "); PRINTF_UINT(n_6); PRINTF("\r\n");
+			}
+			}
+
+			PRINTF("end\r\n");
+			PRINTF_UINT(n_0); PRINTF("\r\n");
+			PRINTF_UINT(n_1); PRINTF("\r\n");
+			PRINTF_UINT(n_2); PRINTF("\r\n");
+			PRINTF_UINT(n_3); PRINTF("\r\n");
+			PRINTF_UINT(n_4); PRINTF("\r\n");
+			PRINTF_UINT(n_5); PRINTF("\r\n");
+			PRINTF_UINT(n_6); PRINTF("\r\n");
+		}
+	}
+	return 0;
+}
+

@@ -1,0 +1,39 @@
+# This is the Makefile for using the Alpaca toolchain to build an app.
+# Include it from a bld/alpaca directory in your app (built with 'maker').
+
+include $(MAKER_ROOT)/Makefile.env
+
+LOCAL_CFLAGS += -DCHINCHILLA
+
+CHINCHILLA_LIB = $(CHINCHILLA_ROOT)/LLVM/build/src/libChinchillaPass.so
+
+%.gp.bc : %.bc
+	$(OPT) -debug -stats -load $(CHINCHILLA_LIB) \
+	  -globalpromotion \
+	  -o $@ $<
+
+%.alpaca.bc : %.gp.bc
+	$(OPT) -debug -stats -load $(CHINCHILLA_LIB) \
+	  -getloopcount \
+	  -transform \
+	  -o $@ $<
+#
+#%.alpaca.bc : %.gp.bc
+#	$(OPT) -debug -stats -load $(ALPACA_LIB) \
+#	  -getloopcount \
+#	  -transform \
+#	  -o $@ $<
+
+LINK_OBJECTS = $(OBJECTS:.o=.alpaca.bc)
+
+override DEPS += \
+	libchinchilla \
+
+DEP_ROOT_libchinchilla = $(CHINCHILLA_ROOT)/ChinchillaRuntime
+
+override CLFAGS += $(LOCAL_CFLAGS) \
+
+include $(MAKER_ROOT)/Makefile.clang
+
+# do not remove any intermediate artifacts
+.SECONDARY:
